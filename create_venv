@@ -1,0 +1,3 @@
+python -m venv tcr-cancer
+. tcr-cancer/Scripts/activate
+python -m pip install -r requirements.txt

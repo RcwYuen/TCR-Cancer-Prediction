@@ -1,7 +1,4 @@
-
-*.gz
-*.tsv
-*.csv
 tcr-cancer
 model
 data
+__pycache__
