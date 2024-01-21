@@ -1,5 +1,5 @@
 # Load model directly
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipeline, AutoModelForMaskedLM
 import argparse
 
 def parse_command_line_arguments():
@@ -27,12 +27,13 @@ if __name__ == "__main__":
     pipe.save_pretrained(OUTPATH + "/ordinary/pipe/")
     print ("Sample Input for Text Classification: 'Hello World!'")
     for outs in pipe("Hello World!", top_k = 10):
-        print (f"{outs['label']:20}: {outs['score']:4f}")
-    print ("Check if output matches on\nhttps://huggingface.co/wukevin/tcr-bert?text=Hello+World%21\n")
+        print (f"{outs['label']:20}: {outs['score']:.4f}")
+    print ("Check if output matches on")
+    print ("https://huggingface.co/wukevin/tcr-bert?text=Hello+World%21\n")
     del pipe
 
     tokenizer = AutoTokenizer.from_pretrained("wukevin/tcr-bert-mlm-only")
-    model = AutoModelForSequenceClassification.from_pretrained("wukevin/tcr-bert-mlm-only")
+    model = AutoModelForMaskedLM.from_pretrained("wukevin/tcr-bert-mlm-only")
     model.save_pretrained(OUTPATH + "/mlm-only/model/")
     tokenizer.save_pretrained(OUTPATH + "/mlm-only/tokenizer/")
     tokenizer.save_vocabulary(OUTPATH + "/mlm-only/tokenizer/")
@@ -42,8 +43,9 @@ if __name__ == "__main__":
     pipe.save_pretrained(OUTPATH + "/mlm-only/pipe/")
     print ("Sample Input for Text Classification: 'Hello World.'")
     for outs in pipe("Hello World.", top_k = 10):
-        print (f"{outs['token_str']:15}: {outs['score']:4f}")
-    print ("Check if output matches on\nhttps://huggingface.co/wukevin/tcr-bert-mlm-only?text=Hello+World.")
+        print (f"{outs['token_str']:15}: {outs['score']:.4f}")
+    print ("Check if output matches on")
+    print ("https://huggingface.co/wukevin/tcr-bert-mlm-only?text=Hello+World.\n")
     del pipe
 
     print ("Done")
