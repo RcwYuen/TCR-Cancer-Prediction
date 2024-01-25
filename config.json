@@ -1,0 +1,28 @@
+{
+    "input-path": "data/files",
+    "output-path": "model/trained",
+    "model-path": "model",
+    "maa-model": true,
+    "negative-dir": [
+        "control"
+    ],
+    "positive-dir": [
+        "lung_cancer",
+        "pbmc_cancer"
+    ],
+    "cdr1": false,
+    "cdr2": false,
+    "needed-embedding": "mean",
+    "batch-size": 1024,
+    "epoch": 50,
+    "lr": [
+        0.01,
+        0.001,
+        0.0001
+    ],
+    "change-lr-at": [
+        10,
+        25,
+        40
+    ]
+}
