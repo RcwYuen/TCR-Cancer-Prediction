@@ -13,7 +13,8 @@ class PatientTCRloader(torch.utils.data.Dataset):
         positives=["lung_cancer", "pbmc_cancer"],
         negatives=["control"],
         cdr1=False,
-        cdr2=False
+        cdr2=False,
+        shuffle=False
     ):
         super(PatientTCRloader, self).__init__()
         self.__columns_needed = ["junction_aa"]
@@ -31,10 +32,13 @@ class PatientTCRloader(torch.utils.data.Dataset):
         )
         self.__files = [(i, 1) for i in self.__positive_files] + \
                        [(i, 0) for i in self.__negative_files]
+        if shuffle:
+            random.shuffle(self.__files)
         trainidx = np.random.choice(np.arange(len(self)), size = int(len(self) * split))
         testidx  = np.setdiff1d(np.arange(len(self)), trainidx)
         self.train_data = torch.utils.data.Subset(self, trainidx)
         self.test_data = torch.utils.data.Subset(self, testidx)
+        
 
     def __load_files(self, paths):
         files = sum([list(i.glob("*")) for i in paths], [])
