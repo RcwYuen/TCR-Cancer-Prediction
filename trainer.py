@@ -230,7 +230,7 @@ if __name__ == "__main__":
         
         
         # This really should be BCE, but BCELoss gives nulls after first backprop instance.
-        criterion = torch.nn.MSELoss()
+        criterion = torch.nn.BCELoss()
         log.print("Optimizer and Loss Set")
 
         log.print("Loading Patient Data")

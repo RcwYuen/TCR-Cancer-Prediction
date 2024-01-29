@@ -7,8 +7,7 @@
         "control"
     ],
     "positive-dir": [
-        "lung_cancer",
-        "pbmc_cancer"
+        "lung_cancer"
     ],
     "cdr1": false,
     "cdr2": false,

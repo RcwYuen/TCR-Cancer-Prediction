@@ -36,9 +36,12 @@ class PatientTCRloader(torch.utils.data.Dataset):
             random.shuffle(self.__files)
         trainidx = np.random.choice(np.arange(len(self)), size = int(len(self) * split))
         testidx  = np.setdiff1d(np.arange(len(self)), trainidx)
-        self.train_data = torch.utils.data.Subset(self, trainidx)
-        self.test_data = torch.utils.data.Subset(self, testidx)
-        
+        self.training = None
+        self.__trainset = self.__files[trainidx]
+        self.__testset  = self.__files(testidx)
+    
+    def set_mode(self, train = True):
+        self.training = train
 
     def __load_files(self, paths):
         files = sum([list(i.glob("*")) for i in paths], [])
@@ -46,7 +49,12 @@ class PatientTCRloader(torch.utils.data.Dataset):
         return files
 
     def __len__(self):
-        return len(self.__files)
+        if self.training is None:
+            return len(self.__files)
+        elif self.training:
+            return len(self.__trainset)
+        else:
+            return len(self.__testset)
 
     def ratio(self, positive=True):
         return (
@@ -59,7 +67,13 @@ class PatientTCRloader(torch.utils.data.Dataset):
         return filepath.suffix[1::]
 
     def __getitem__(self, x):
-        filepath, label = self.__files[x]
+        if self.training is None:
+            filepath, label = self.__files[x]
+        elif self.training:
+            filepath, label = self.__trainset[x]
+        else:
+            filepath, label = self.__testset[x]
+
         if self.__filetype(filepath) == "tsv":
             df = pd.read_csv(filepath, delimiter="\t")[self.__columns_needed]
         else:
