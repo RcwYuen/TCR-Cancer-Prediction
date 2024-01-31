@@ -215,6 +215,12 @@ if __name__ == "__main__":
         config_file = (
             parser.config_file if parser.config_file is not None else "config.json"
         )
+
+        if torch.cuda.is_available():
+            log.print(f"Torch CUDA Device Count: {torch.cuda.device_count()}")
+            for i in range(torch.cuda.device_count()):
+                print(f"CUDA Device {i}: {torch.cuda.get_device_name(i)}")
+
         # In case config.json does not exist
         custom_configs = default_configs(write_to=False) 
         custom_configs = load_configs(json.load(open(config_file, "r")))
@@ -340,6 +346,7 @@ if __name__ == "__main__":
             trainloss.append(sum(trainbatchloss) / len(trainbatchloss))
             trainacc.append(sum(trainbatchacc)  / len(trainbatchacc))
 
+            log.print("Validating", "INFO")
             patient_loader.set_mode(train = False)
             with torch.no_grad():
                 for i in range(len(patient_loader)):
@@ -408,8 +415,8 @@ if __name__ == "__main__":
 
             pd.DataFrame(testbatchloss).to_csv(outpath / "test-loss.csv", index = False, header = False)
             pd.DataFrame(testbatchacc).to_csv(outpath / "test-acc.csv", index = False, header = False)
-            torch.save(bertmodel.state_dict(), make_output_path(custom_configs["output-path"]) / f"bertmodel-{e}.pth")
-            torch.save(classifier_model.state_dict(), make_output_path(custom_configs["output-path"]) / f"classifier-{e}.pth")
+            torch.save(bertmodel.state_dict(), outpath / f"bertmodel-{e}.pth")
+            torch.save(classifier_model.state_dict(), outpath / f"classifier-{e}.pth")
 
             log.print(f"End of Epoch {e}")
             log.print(f"Average Loss: {trainloss[-1]}; Average Accuracy: {trainacc[-1]}")

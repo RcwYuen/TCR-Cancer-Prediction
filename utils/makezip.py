@@ -2,10 +2,10 @@ import zipfile
 import glob
 
 paths = [
-    "data/**",
-    "model/mlm-only/model/**",
-    "model/mlm-only/tokenizer/**",
-    "scripts/**",
+    # "data/**",
+    # "model/mlm-only/model/**",
+    # "model/mlm-only/tokenizer/**",
+    # "scripts/**",
     "utils/**",
     "trainer.py"
 ]

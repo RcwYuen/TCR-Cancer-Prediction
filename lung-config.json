@@ -1,0 +1,21 @@
+{
+    "input-path": "data/files",
+    "output-path": "trained",
+    "model-path": "model",
+    "maa-model": true,
+    "negative-dir": [
+        "control"
+    ],
+    "positive-dir": [
+        "lung_cancer"
+    ],
+    "cdr1": false,
+    "cdr2": false,
+    "batch-size": 512,
+    "epoch": 50,
+    "lr": 0.01,
+    "change-lr-at": 50,
+    "train-split": 0.8,
+    "bag-accummulate-loss": 4,
+    "train-bert": true
+}
