@@ -35,11 +35,10 @@ class PatientTCRloader(torch.utils.data.Dataset):
         if shuffle:
             random.shuffle(self.__files)
         self.training = None
-        trainidx = np.random.choice(np.arange(len(self)), size = int(len(self) * split)).astype(int)
-        print (trainidx)
-        testidx  = np.setdiff1d(np.arange(len(self)), trainidx).astype(int)
-        self.__trainset = self.__files[trainidx]
-        self.__testset  = self.__files(testidx)
+        trainidx = np.random.choice(np.arange(len(self.__files)), replace = False, size = int(len(self) * split)).astype(int)
+        testidx  = np.setdiff1d(np.arange(len(self.__files)), trainidx).astype(int)
+        self.__trainset = [self.__files[i] for i in trainidx]
+        self.__testset  = [self.__files[i] for i in testidx]
     
     def set_mode(self, train = True):
         self.training = train

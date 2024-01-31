@@ -1,17 +1,15 @@
 import torch
 from sparsemax import Sparsemax
 
-class classifier(torch.nn.Module):
+class unidirectional(torch.nn.Module):
     def __init__(self):
-        super(classifier, self).__init__()
+        super(unidirectional, self).__init__()
         self.last_scores = None
         self.last_weights = None
 
         self.scoring_linear1 = torch.nn.Linear(768, 1)
-        self.relu = torch.nn.ReLU(inplace = False)
         self.sparsemax = Sparsemax(dim = 0)
-
-        self.classifying_linear1 = torch.nn.Linear(768, 1)        
+        self.classifying_linear1 = torch.nn.Linear(768, 1)
         self.sig = torch.nn.Sigmoid()
 
     def forward(self, x):
@@ -24,6 +22,5 @@ class classifier(torch.nn.Module):
         # need to transpose the scores first and transpose it back.
         self.last_weights = self.sparsemax(self.last_scores.T).T
         agg_out = torch.sum(self.last_weights * x, dim = 0, keepdim = True)
-
         result = self.classifying_linear1(agg_out)
         return self.sig(result)

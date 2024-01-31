@@ -14,11 +14,12 @@ import pandas as pd
 from pathlib import Path
 import os
 import sys
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from model import classifier
+from model import unidirectional as classifier
+import time
+import datetime
+import gc
 
-global log
+global log, total_patients
 
 
 
@@ -29,25 +30,30 @@ def parse_command_line_arguments() -> argparse.Namespace:
         "--make", action="store_true", help="Make Configuration JSON Template"
     )
     parser.add_argument("--log-file", help="Logging File Name")
+    parser.add_argument(
+        "--end", action="store_true", 
+        help = "End after making Configuration Template.  Not applied \
+            if Config Template is not going to be produce.")
     return parser.parse_args()
 
 
 def default_configs(write_to=False):
     configs = {
         "input-path": "data/files",
-        "output-path": "model/trained",
+        "output-path": "trained",
         "model-path": "model",
         "maa-model": True,
         "negative-dir": ["control"],
         "positive-dir": ["lung_cancer", "pbmc_cancer"],
         "cdr1": False,
         "cdr2": False,
-        "needed-embedding": "mean",
         "batch-size": 512,
         "epoch": 50,
-        "lr": [0.01, 0.001, 0.0001],
-        "change-lr-at": [10, 25, 40],
-        "train-split": 0.8
+        "lr": 0.01,
+        "change-lr-at": 50,
+        "train-split": 0.8,
+        "bag-accummulate-loss": 4,
+        "train-bert": True
     }
 
     if write_to:
@@ -95,6 +101,101 @@ def lr_lambda(epoch, change_epochs, new_lrs, optimizer):
     return 1
 
 
+def load_llm(custom_configs):
+    log.print("Tokenizer Loaded")
+    if custom_configs["maa-model"]:
+        log.print("Loading Tokenizer")
+        tokenizer = AutoTokenizer.from_pretrained(
+            custom_configs["model-path"] + "/mlm-only/tokenizer"
+        )
+        log.print("Loading Masked Amino Acid Model")
+        bertmodel = AutoModelForMaskedLM.from_pretrained(
+            custom_configs["model-path"] + "/mlm-only/model"
+        ).bert
+
+    else:
+        log.print("Loading Tokenizer")
+        tokenizer = AutoTokenizer.from_pretrained(
+            custom_configs["model-path"] + "ordinary/tokenizer"
+        )
+        log.print("Loading Sequence Classification Model")
+        bertmodel = AutoModelForSequenceClassification.from_pretrained(
+            custom_configs["model-path"] + "ordinary/model"
+        ).bert
+    return tokenizer, bertmodel
+
+
+def throw_to_cuda(models, names):
+    if torch.cuda.is_available():
+        cuda_models = []
+        model_gpu_usage = []
+        for m, n in zip(models, names):
+            cuda_models.append(m)
+            log.print(f"Pushing {n} Model to cuda")
+            start_mem = torch.cuda.memory_allocated()
+            cuda_models[-1] = cuda_models[-1].to("cuda")
+            gpu_usage = torch.cuda.memory_allocated() - start_mem
+            log.print(
+                f"Memory Reserved for {n} Model: {gpu_usage} bytes"
+            )
+            model_gpu_usage.append(gpu_usage)
+        return cuda_models, model_gpu_usage
+    return models, []
+
+
+def make_optimizer(custom_configs):
+    scheduler = None
+    trainable_params = list(bertmodel.parameters()) + list(classifier_model.parameters()) \
+        if custom_configs["train-bert"] else list(classifier_model.parameters())
+    if isinstance(custom_configs["lr"], list) and isinstance(custom_configs["change-lr-at"], list):
+        assert len(custom_configs["lr"]) == len(custom_configs["change-lr-at"])
+        optimizer = torch.optim.Adam(
+            trainable_params,
+            lr = custom_configs["lr"][0]
+        )
+        scheduler = torch.optim.lr_scheduler.LambdaLR(
+            optimizer,
+            lr_lambda = lambda x: lr_lambda(
+                x, custom_configs["change-lr-at"], custom_configs["lr"], optimizer
+            )
+        )
+    elif isinstance(custom_configs["lr"], list):
+        log.print(
+            "LR and Change LR Epoch are not both lists, the first LR will be used and no scheduling will be done", 
+            "WARN"
+        )
+        optimizer = torch.optim.Adam(
+            trainable_params,
+            lr = custom_configs["lr"][0]
+        )
+    
+    else:
+        log.print(
+            "LR and Change LR Epoch are not both lists, Change LR Epoch will be ignored",
+            "WARN"
+        )
+        optimizer = torch.optim.Adam(
+            trainable_params,
+            lr = custom_configs["lr"]
+        )
+
+    return optimizer, scheduler
+
+
+def projected_completion_time(start_time, custom_configs, current_status):
+    epochno, curpat = current_status
+    batches_done = epochno * total_patients + curpat + 1
+    batches_need = (custom_configs["epoch"] - epochno + 1) * total_patients - curpat
+    return batches_need * (time.time() - start_time) / batches_done
+
+
+def make_output_path(outdir, epochno = "", fname = ""):
+    if epochno != "":
+        return Path.cwd() / outdir / f"Epoch {epochno}" / fname
+    else:
+        return Path.cwd() / outdir
+
+
 if __name__ == "__main__":
     try:
         parser = parse_command_line_arguments()
@@ -104,90 +205,36 @@ if __name__ == "__main__":
         log.print("Instanciating")
         arg = " ".join(sys.argv)
         log.print("Arguments: python " + " ".join(sys.argv), "INFO", silent=True)
+
         if parser.make:
             log.print("Creating Configuration Template")
             default_configs(write_to=True)
-            quit()
+            if parser.end:
+                quit()
 
         config_file = (
             parser.config_file if parser.config_file is not None else "config.json"
         )
+        # In case config.json does not exist
+        custom_configs = default_configs(write_to=False) 
         custom_configs = load_configs(json.load(open(config_file, "r")))
-        log.print("Tokenizer Loaded")
-        if custom_configs["maa-model"]:
-            log.print("Loading Tokenizer")
-            tokenizer = AutoTokenizer.from_pretrained(
-                custom_configs["model-path"] + "/mlm-only/tokenizer"
-            )
-            log.print("Loading Masked Amino Acid Model")
-            bertmodel = AutoModelForMaskedLM.from_pretrained(
-                custom_configs["model-path"] + "/mlm-only/model"
-            ).bert
-
-        else:
-            log.print("Loading Tokenizer")
-            tokenizer = AutoTokenizer.from_pretrained(
-                custom_configs["model-path"] + "ordinary/tokenizer"
-            )
-            log.print("Loading Sequence Classification Model")
-            bertmodel = AutoModelForSequenceClassification.from_pretrained(
-                custom_configs["model-path"] + "ordinary/model"
-            ).bert
-
+        tokenizer, bertmodel = load_llm(custom_configs)
         classifier_model = classifier()
-        if torch.cuda.is_available():
-            log.print("Pushing BERT Model to cuda")
-            start_mem = torch.cuda.memory_allocated()
-            bertmodel = bertmodel.to("cuda")
-            torch.save(bertmodel.state_dict(), "bert.pth")
-            bertmodel_gpu_usage = torch.cuda.memory_allocated() - start_mem
-            log.print(
-                f"Memory Reserved for BERT Model: {bertmodel_gpu_usage} bytes"
-            )
-            log.print("Pushing Classifier Model to cuda")
-            start_mem = torch.cuda.memory_allocated()
-            classifier_model = classifier_model.to("cuda")
-            classifier_gpu_usage = torch.cuda.memory_allocated() - start_mem
-            log.print(
-                f"Memory Reserved for Classifier Model: {classifier_gpu_usage} bytes"
-            )
-            
-        log.print("Setting Up Optimizer and Loss Function")
-        if isinstance(custom_configs["lr"], list) and isinstance(custom_configs["change-lr-at"], list):
-            assert len(custom_configs["lr"]) == len(custom_configs["change-lr-at"])
-            optimizer = torch.optim.Adam(
-                list(bertmodel.parameters()) + list(classifier_model.parameters()),
-                lr = custom_configs["lr"][0]
-            )
-            scheduler = torch.optim.lr_scheduler.LambdaLR(
-                optimizer,
-                lr_lambda = lambda x: lr_lambda(
-                    x, custom_configs["change-lr-at"], custom_configs["lr"], optimizer
-                )
-            )
-        elif isinstance(custom_configs["lr"], list):
-            log.print(
-                "LR and Change LR Epoch are not both lists, the first LR will be used and no scheduling will be done", 
-                "WARN"
-            )
-            optimizer = torch.optim.Adam(
-                list(bertmodel.parameters()) + list(classifier_model.parameters()),
-                lr = custom_configs["lr"][0]
-            )
-        
-        else:
-            log.print(
-                "LR and Change LR Epoch are not both lists, Change LR Epoch will be ignored",
-                "WARN"
-            )
-            optimizer = torch.optim.Adam(
-                list(bertmodel.parameters()) + list(classifier_model.parameters()),
-                lr = custom_configs["lr"]
-            )
+        models, gpu_usages = throw_to_cuda(
+            [classifier_model, bertmodel],
+            ["Classifier", "BERT"]
+        )
+        classifier_model, bertmodel = models
+        if not custom_configs["train-bert"]:
+            log.print("Freezing BERT Layers")
+            for param in bertmodel.parameters():
+                param.requires_grad = False
 
-        
-        
-        # This really should be BCE, but BCELoss gives nulls after first backprop instance.
+        classifier_gpu_usage, bertmodel_gpu_usage = gpu_usages
+
+
+        log.print("Setting Up Optimizer and Loss Function")
+        optimizer, scheduler = make_optimizer(custom_configs)
         criterion = torch.nn.BCELoss()
         log.print("Optimizer and Loss Set")
 
@@ -197,15 +244,24 @@ if __name__ == "__main__":
             **make_tcrargs(custom_configs),
             shuffle = True
         )
+        total_patients = len(patient_loader)
         log.print("Data Loaded")
         log.print("Commencing Training")
         
         trainloss = []
         trainacc  = []
-
+        testloss  = []
+        testacc   = []
+        start_time = time.time()
         for e in range(custom_configs["epoch"]):
-            batchloss = []
-            batchacc  = []
+            trainbatchloss = []
+            trainbatchacc  = []
+            testbatchloss  = []
+            testbatchacc   = []
+            outpath = make_output_path(custom_configs["output-path"], e)
+            make_directory_where_necessary(outpath)
+            accummulatedloss = []
+            patient_loader.set_mode(train = True)
             for i in range(len(patient_loader)):
                 filepath, pattcr = patient_loader[i]
                 log.print(
@@ -240,22 +296,14 @@ if __name__ == "__main__":
                         )
 
                     embeddings = bertmodel(**inputs).last_hidden_state
+                    embeddings = torch.mean(embeddings, dim=1)
                     log.print(f"Embeddings Generated")
-
-                    if custom_configs["needed-embedding"] == "last":
-                        embeddings = embeddings[:, -1, :]
-                    elif custom_configs["needed-embedding"] == "mean":
-                        embeddings = torch.mean(embeddings, dim=1)
-                    else:
-                        raise ValueError(
-                            "Unrecognised Needed Configuration Setting.  Supported settings are 'last' and 'mean'"
-                        )
 
                     all_embeddings = all_embeddings + embeddings.tolist()
                     log.print(f"Required Embedding Vectors Extracted")
-
                     del embeddings, inputs
                     torch.cuda.empty_cache()
+                    gc.collect()
                 
                 log.print(f"All Needed Embeddings Extracted")
                 all_embeddings = torch.from_numpy(np.array(all_embeddings)).to(torch.float32)
@@ -264,42 +312,128 @@ if __name__ == "__main__":
                 truelabel      = torch.full_like(prediction, pattcr[0], dtype = torch.float32)
                 truelabel      = truelabel.cuda() if torch.cuda.is_available() else truelabel
                 loss           = criterion(prediction, truelabel) / patient_loader.ratio(positive = bool(pattcr[0]))
-                batchloss.append(loss.data.tolist())
-                batchacc.append(int(pattcr[0] == int(prediction >= 0.5)))
-
-                log.print(f"File {i} / {len(patient_loader)}: Predicted Value: {prediction.data.tolist()} ; True Value: {pattcr[0]}")
-                log.print(f"File {i} / {len(patient_loader)}: Loss: {loss.data.tolist()}")
-                optimizer.zero_grad()
+                accummulatedloss.append(loss.data.tolist())
+                trainbatchloss.append(loss.data.tolist())
+                trainbatchacc.append(int(pattcr[0] == int(prediction >= 0.5)))
                 loss.backward()
-                optimizer.step()
+
+                log.print(f"File {i} / {len(patient_loader)}: Predicted Value: {prediction.data.tolist()[0][0]} ; True Value: {pattcr[0]}")
+                log.print(f"File {i} / {len(patient_loader)}: Loss: {loss.data.tolist()}")
+                secs_needed = projected_completion_time(start_time, custom_configs, [e, i])
+                log.print(f"Projected Time Needed: {secs_needed} seconds")
+                log.print(f"Projected Completion Time: {str(datetime.datetime.now() + datetime.timedelta(seconds = secs_needed))}")
+
+                if (i + 1) % custom_configs["bag-accummulate-loss"] == 0 or i == (len(patient_loader) - 1):
+                    log.print(f"Updating Network; Accummulated Loss: {str([round(i, 4) for i in accummulatedloss])}")
+                    optimizer.step()
+                    log.print(f"Clearing Gradients")
+                    optimizer.zero_grad()
+                    accummulatedloss = []
 
                 del all_embeddings, prediction, truelabel, loss
                 if torch.cuda.is_available():
                     torch.cuda.empty_cache()
+                    gc.collect()
             
-            trainloss.append(sum(batchloss) / len(batchloss))
-            trainacc.append(sum(batchacc)  / len(batchacc))
+            pd.DataFrame(trainbatchloss).to_csv(outpath / "train-loss.csv", index = False, header = False)
+            pd.DataFrame(trainbatchacc).to_csv(outpath / "train-acc.csv", index = False, header = False)
+            trainloss.append(sum(trainbatchloss) / len(trainbatchloss))
+            trainacc.append(sum(trainbatchacc)  / len(trainbatchacc))
+
+            patient_loader.set_mode(train = False)
+            with torch.no_grad():
+                for i in range(len(patient_loader)):
+                    filepath, pattcr = patient_loader[i]
+                    log.print(
+                        f"Processing {Path(filepath).stem} ; File {i} / {len(patient_loader)}.  True Label {pattcr[0]}"
+                    )
+                    pattcr_loader = torch.utils.data.DataLoader(
+                        TCRloader(*pattcr).data,
+                        batch_size=custom_configs["batch-size"],
+                        shuffle=True,
+                    )
+
+                    all_embeddings = []
+                    for batchno, tcr in enumerate(pattcr_loader):
+                        log.print(f"Batch No.: {batchno} / {len(pattcr_loader)}")
+                        inputs = tokenizer(tcr, return_tensors="pt", padding=True)
+
+                        if torch.cuda.is_available():
+                            log.print(f"Pushing Tokens to cuda")
+                            start_mem = torch.cuda.memory_allocated()
+                            inputs = {k: v.to("cuda") for k, v in inputs.items()}
+                            log.print(
+                            f"Memory Reserved for Tokens: {(torch.cuda.memory_allocated() - start_mem)} bytes"
+                        )
+                            log.print(
+                            f"Current CUDA Memory Utilisation (Total): {(torch.cuda.memory_allocated())} bytes"
+                        )
+                            log.print(
+                            f"Current CUDA Memory Utilisation (Excluding BERT Model): {(torch.cuda.memory_allocated()) - bertmodel_gpu_usage} bytes"
+                        )
+                            log.print(
+                            f"Current CUDA Memory Utilisation (Excluding Both Models): {(torch.cuda.memory_allocated()) - classifier_gpu_usage - bertmodel_gpu_usage} bytes"
+                        )
+
+                        embeddings = bertmodel(**inputs).last_hidden_state
+                        embeddings = torch.mean(embeddings, dim=1)
+                        log.print(f"Embeddings Generated")
+
+                        all_embeddings = all_embeddings + embeddings.tolist()
+                        log.print(f"Required Embedding Vectors Extracted")
+                        del embeddings, inputs
+                        torch.cuda.empty_cache()
+                        gc.collect()
+
+                    log.print(f"All Needed Embeddings Extracted")
+                    all_embeddings = torch.from_numpy(np.array(all_embeddings)).to(torch.float32)
+                    all_embeddings = all_embeddings.cuda() if torch.cuda.is_available() else all_embeddings
+                    prediction     = classifier_model(all_embeddings)
+                    truelabel      = torch.full_like(prediction, pattcr[0], dtype = torch.float32)
+                    truelabel      = truelabel.cuda() if torch.cuda.is_available() else truelabel
+                    loss           = criterion(prediction, truelabel) / patient_loader.ratio(positive = bool(pattcr[0]))
+                    testbatchloss.append(loss.data.tolist())
+                    testbatchacc.append(int(pattcr[0] == int(prediction >= 0.5)))
+
+                    log.print(f"File {i} / {len(patient_loader)}: Predicted Value: {prediction.data.tolist()[0][0]} ; True Value: {pattcr[0]}")
+                    log.print(f"File {i} / {len(patient_loader)}: Loss: {loss.data.tolist()}")
+                    secs_needed = projected_completion_time(start_time, custom_configs, [e, i])
+                    log.print(f"Projected Time Needed: {secs_needed} seconds")
+                    log.print(f"Projection Completion Time: {str(datetime.datetime.now() + datetime.timedelta(seconds = secs_needed))}")
+
+                    del all_embeddings, prediction, truelabel, loss
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+                        gc.collect()
+
+            pd.DataFrame(testbatchloss).to_csv(outpath / "test-loss.csv", index = False, header = False)
+            pd.DataFrame(testbatchacc).to_csv(outpath / "test-acc.csv", index = False, header = False)
+            torch.save(bertmodel.state_dict(), make_output_path(custom_configs["output-path"]) / f"bertmodel-{e}.pth")
+            torch.save(classifier_model.state_dict(), make_output_path(custom_configs["output-path"]) / f"classifier-{e}.pth")
+
             log.print(f"End of Epoch {e}")
             log.print(f"Average Loss: {trainloss[-1]}; Average Accuracy: {trainacc[-1]}")
-
-        pd.DataLoader(trainloss).to_csv("trainloss.csv", index = False, header = False)
-        pd.DataLoader(trainacc).to_csv("trainloss.csv", index = False, header = False)
-        torch.save(bertmodel.state_dict(), "bert-model-trained.pth")
-        torch.save(classifier.state_dict(), "classifier-trained.pth")
+            testloss.append(sum(testbatchloss) / len(testbatchloss))
+            testacc.append(sum(testbatchacc)  / len(testbatchacc))
 
     except Exception as e:
-        log.print("Saving Model Instance")
-        torch.save(bertmodel.state_dict(), "bert-model-mid-trained.pth")
-        torch.save(classifier.state_dict(), "classifier-mid-trained.pth")
-
         log.print(f"Error Encountered: Logging Information", "ERROR")
         if torch.cuda.is_available():
             log.print(f"Torch Memory Taken: {torch.cuda.memory_allocated()}")
         log.print(f"{type(e).__name__}: {str(e)}", "ERROR")
     
+    except KeyboardInterrupt:
+        log.print("Interrupted", "INFO")
+
     finally:
         try:
+            outpath = make_output_path(custom_configs["output-path"])
+            make_directory_where_necessary(outpath)
             log.close()
+            pd.DataFrame(trainloss).to_csv(outpath / "trainloss.csv", index = False, header = False)
+            pd.DataFrame(trainacc).to_csv(outpath / "trainacc.csv", index = False, header = False)
+            torch.save(bertmodel.state_dict(), outpath / "bertmodel-trained.pth")
+            torch.save(classifier_model.state_dict(), outpath / "classifier-trained.pth")
         except NameError:
             pass
 
