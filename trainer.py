@@ -318,19 +318,22 @@ if __name__ == "__main__":
                 truelabel      = torch.full_like(prediction, pattcr[0], dtype = torch.float32)
                 truelabel      = truelabel.cuda() if torch.cuda.is_available() else truelabel
                 loss           = criterion(prediction, truelabel) / patient_loader.ratio(positive = bool(pattcr[0]))
-                accummulatedloss.append(loss.data.tolist())
-                trainbatchloss.append(loss.data.tolist())
+                lossval        = criterion(prediction, truelabel).data.tolist()
+                accummulatedloss.append(lossval)
+                trainbatchloss.append(lossval)
                 trainbatchacc.append(int(pattcr[0] == int(prediction >= 0.5)))
                 loss.backward()
 
                 log.print(f"File {i} / {len(patient_loader)}: Predicted Value: {prediction.data.tolist()[0][0]} ; True Value: {pattcr[0]}")
-                log.print(f"File {i} / {len(patient_loader)}: Loss: {loss.data.tolist()}")
+                log.print(f"File {i} / {len(patient_loader)}: Loss: {lossval}")
                 secs_needed = projected_completion_time(start_time, custom_configs, [e, i])
                 log.print(f"Projected Time Needed: {secs_needed} seconds")
                 log.print(f"Projected Completion Time: {str(datetime.datetime.now() + datetime.timedelta(seconds = secs_needed))}")
 
                 if (i + 1) % custom_configs["bag-accummulate-loss"] == 0 or i == (len(patient_loader) - 1):
-                    log.print(f"Updating Network; Accummulated Loss: {str([round(i, 4) for i in accummulatedloss])}")
+                    log.print(f"Updating Network")
+                    log.print(f"Accummulated Loss (Unnormalised): {str([round(i, 4) for i in accummulatedloss])}")
+                    log.print(f"Accummulated Loss (Average): {sum(accummulatedloss) / len(accummulatedloss)}")
                     optimizer.step()
                     log.print(f"Clearing Gradients")
                     optimizer.zero_grad()
@@ -398,7 +401,7 @@ if __name__ == "__main__":
                     prediction     = classifier_model(all_embeddings)
                     truelabel      = torch.full_like(prediction, pattcr[0], dtype = torch.float32)
                     truelabel      = truelabel.cuda() if torch.cuda.is_available() else truelabel
-                    loss           = criterion(prediction, truelabel) / patient_loader.ratio(positive = bool(pattcr[0]))
+                    loss           = criterion(prediction, truelabel)
                     testbatchloss.append(loss.data.tolist())
                     testbatchacc.append(int(pattcr[0] == int(prediction >= 0.5)))
 

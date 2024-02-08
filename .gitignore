@@ -8,5 +8,5 @@ __pycache__
 *.log
 *.zip
 *.pth
-*trained
+*trained*
 subset
