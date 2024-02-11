@@ -219,7 +219,7 @@ if __name__ == "__main__":
         if torch.cuda.is_available():
             log.print(f"Torch CUDA Device Count: {torch.cuda.device_count()}")
             for i in range(torch.cuda.device_count()):
-                print(f"CUDA Device {i}: {torch.cuda.get_device_name(i)}")
+                log.print(f"CUDA Device {i}: {torch.cuda.get_device_name(i)}")
 
         # In case config.json does not exist
         custom_configs = default_configs(write_to=False) 
@@ -427,10 +427,11 @@ if __name__ == "__main__":
             testacc.append(sum(testbatchacc)  / len(testbatchacc))
 
     except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
         log.print(f"Error Encountered: Logging Information", "ERROR")
         if torch.cuda.is_available():
             log.print(f"Torch Memory Taken: {torch.cuda.memory_allocated()}")
-        log.print(f"{type(e).__name__}: {str(e)}", "ERROR")
+        log.print(f"Line {exc_tb.tb_lineno} - {type(e).__name__}: {str(e)}", "ERROR")
     
     except KeyboardInterrupt:
         log.print("Interrupted", "INFO")

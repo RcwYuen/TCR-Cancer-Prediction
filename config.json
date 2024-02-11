@@ -1,0 +1,21 @@
+{
+    "input-path": "data/compressed",
+    "output-path": "trained",
+    "model-path": "model",
+    "maa-model": true,
+    "negative-dir": [
+        "control"
+    ],
+    "positive-dir": [
+        "pbmc_cancer"
+    ],
+    "cdr1": false,
+    "cdr2": false,
+    "batch-size": 1024,
+    "epoch": 10,
+    "lr": 0.01,
+    "change-lr-at": 50,
+    "train-split": 0.8,
+    "bag-accummulate-loss": 4,
+    "train-bert": true
+}

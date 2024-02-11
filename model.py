@@ -24,3 +24,14 @@ class unidirectional(torch.nn.Module):
         agg_out = torch.sum(self.last_weights * x, dim = 0, keepdim = True)
         result = self.classifying_linear1(agg_out)
         return self.sig(result)
+
+def load_trained(path_to_trained, hypothesised_model):
+    model = hypothesised_model()
+    model.load_state_dict(torch.load(path_to_trained))
+    return model.cuda() if torch.cuda.is_available() else model
+
+def reset_classifier(model):
+    for name, module in model.named_modules():
+        if "classifying" in name:
+            module.reset_parameters()
+            print (f"resetted {name}")
