@@ -139,7 +139,7 @@ def throw_to_cuda(models, names):
             )
             model_gpu_usage.append(gpu_usage)
         return cuda_models, model_gpu_usage
-    return models, []
+    return models, [None] * len(models)
 
 
 def make_optimizer(custom_configs):
