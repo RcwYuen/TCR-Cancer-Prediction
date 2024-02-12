@@ -20,8 +20,7 @@ import datetime
 import gc
 
 global log, total_patients
-
-
+np.random.seed(42)
 
 def parse_command_line_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Model Trainer for TCR Data")
@@ -235,9 +234,7 @@ if __name__ == "__main__":
             log.print("Freezing BERT Layers")
             for param in bertmodel.parameters():
                 param.requires_grad = False
-
         classifier_gpu_usage, bertmodel_gpu_usage = gpu_usages
-
 
         log.print("Setting Up Optimizer and Loss Function")
         optimizer, scheduler = make_optimizer(custom_configs)
@@ -264,6 +261,8 @@ if __name__ == "__main__":
             trainbatchacc  = []
             testbatchloss  = []
             testbatchacc   = []
+            trainactualpreds = {"preds": [], "actual": []}
+            testactualpreds  = {"preds": [], "actual": []}
             outpath = make_output_path(custom_configs["output-path"], e)
             make_directory_where_necessary(outpath)
             accummulatedloss = []
@@ -319,9 +318,13 @@ if __name__ == "__main__":
                 truelabel      = truelabel.cuda() if torch.cuda.is_available() else truelabel
                 loss           = criterion(prediction, truelabel) / patient_loader.ratio(positive = bool(pattcr[0]))
                 lossval        = criterion(prediction, truelabel).data.tolist()
+
                 accummulatedloss.append(lossval)
                 trainbatchloss.append(lossval)
+                trainactualpreds["preds"].append(prediction.data.tolist()[0][0])
+                trainactualpreds["actual"].append(pattcr[0])
                 trainbatchacc.append(int(pattcr[0] == int(prediction >= 0.5)))
+
                 loss.backward()
 
                 log.print(f"File {i} / {len(patient_loader)}: Predicted Value: {prediction.data.tolist()[0][0]} ; True Value: {pattcr[0]}")
@@ -346,6 +349,7 @@ if __name__ == "__main__":
             
             pd.DataFrame(trainbatchloss).to_csv(outpath / "train-loss.csv", index = False, header = False)
             pd.DataFrame(trainbatchacc).to_csv(outpath / "train-acc.csv", index = False, header = False)
+            pd.DataFrame(trainactualpreds).to_csv(outpath / "train-preds.csv", index = False)
             trainloss.append(sum(trainbatchloss) / len(trainbatchloss))
             trainacc.append(sum(trainbatchacc)  / len(trainbatchacc))
 
@@ -404,6 +408,8 @@ if __name__ == "__main__":
                     loss           = criterion(prediction, truelabel)
                     testbatchloss.append(loss.data.tolist())
                     testbatchacc.append(int(pattcr[0] == int(prediction >= 0.5)))
+                    testactualpreds["preds"].append(prediction.data.tolist()[0][0])
+                    testactualpreds["actual"].append(pattcr[0])
 
                     log.print(f"File {i} / {len(patient_loader)}: Predicted Value: {prediction.data.tolist()[0][0]} ; True Value: {pattcr[0]}")
                     log.print(f"File {i} / {len(patient_loader)}: Loss: {loss.data.tolist()}")
@@ -418,6 +424,7 @@ if __name__ == "__main__":
 
             pd.DataFrame(testbatchloss).to_csv(outpath / "test-loss.csv", index = False, header = False)
             pd.DataFrame(testbatchacc).to_csv(outpath / "test-acc.csv", index = False, header = False)
+            pd.DataFrame(testactualpreds).to_csv(outpath / "test-preds.csv", index = False)
             torch.save(bertmodel.state_dict(), outpath / f"bertmodel-{e}.pth")
             torch.save(classifier_model.state_dict(), outpath / f"classifier-{e}.pth")
 
@@ -425,6 +432,160 @@ if __name__ == "__main__":
             log.print(f"Average Loss: {trainloss[-1]}; Average Accuracy: {trainacc[-1]}")
             testloss.append(sum(testbatchloss) / len(testbatchloss))
             testacc.append(sum(testbatchacc)  / len(testbatchacc))
+
+        # Generate AUC Statistics
+        log.print("Generating Predictions for AUC", "INFO")
+        outpath = make_output_path(custom_configs["output-path"])
+        make_directory_where_necessary(outpath)
+        
+        with torch.no_grad():
+            trainbatchloss = []
+            trainbatchacc  = []
+            testbatchloss  = []
+            testbatchacc   = []
+            trainactualpreds = {"preds": [], "actual": []}
+            testactualpreds  = {"preds": [], "actual": []}
+            patient_loader.set_mode(train = True)
+            for i in range(len(patient_loader)):
+                filepath, pattcr = patient_loader[i]
+                log.print(
+                    f"Processing {Path(filepath).stem} ; File {i} / {len(patient_loader)}.  True Label {pattcr[0]}"
+                )
+                pattcr_loader = torch.utils.data.DataLoader(
+                    TCRloader(*pattcr).data,
+                    batch_size=custom_configs["batch-size"],
+                    shuffle=True,
+                )
+                
+                all_embeddings = []
+                for batchno, tcr in enumerate(pattcr_loader):
+                    log.print(f"Batch No.: {batchno} / {len(pattcr_loader)}")
+                    inputs = tokenizer(tcr, return_tensors="pt", padding=True)
+
+                    if torch.cuda.is_available():
+                        log.print(f"Pushing Tokens to cuda")
+                        start_mem = torch.cuda.memory_allocated()
+                        inputs = {k: v.to("cuda") for k, v in inputs.items()}
+                        log.print(
+                            f"Memory Reserved for Tokens: {(torch.cuda.memory_allocated() - start_mem)} bytes"
+                        )
+                        log.print(
+                            f"Current CUDA Memory Utilisation (Total): {(torch.cuda.memory_allocated())} bytes"
+                        )
+                        log.print(
+                            f"Current CUDA Memory Utilisation (Excluding BERT Model): {(torch.cuda.memory_allocated()) - bertmodel_gpu_usage} bytes"
+                        )
+                        log.print(
+                            f"Current CUDA Memory Utilisation (Excluding Both Models): {(torch.cuda.memory_allocated()) - classifier_gpu_usage - bertmodel_gpu_usage} bytes"
+                        )
+
+                    embeddings = bertmodel(**inputs).last_hidden_state
+                    embeddings = torch.mean(embeddings, dim=1)
+                    log.print(f"Embeddings Generated")
+
+                    all_embeddings = all_embeddings + embeddings.tolist()
+                    log.print(f"Required Embedding Vectors Extracted")
+                    del embeddings, inputs
+                    torch.cuda.empty_cache()
+                    gc.collect()
+                
+                log.print(f"All Needed Embeddings Extracted")
+                all_embeddings = torch.from_numpy(np.array(all_embeddings)).to(torch.float32)
+                all_embeddings = all_embeddings.cuda() if torch.cuda.is_available() else all_embeddings
+                prediction     = classifier_model(all_embeddings)
+                truelabel      = torch.full_like(prediction, pattcr[0], dtype = torch.float32)
+                truelabel      = truelabel.cuda() if torch.cuda.is_available() else truelabel
+                loss           = criterion(prediction, truelabel) / patient_loader.ratio(positive = bool(pattcr[0]))
+                lossval        = criterion(prediction, truelabel).data.tolist()
+
+                trainbatchloss.append(lossval)
+                trainactualpreds["preds"].append(prediction.data.tolist()[0][0])
+                trainactualpreds["actual"].append(pattcr[0])
+                trainbatchacc.append(int(pattcr[0] == int(prediction >= 0.5)))
+                log.print(f"File {i} / {len(patient_loader)}: Predicted Value: {prediction.data.tolist()[0][0]} ; True Value: {pattcr[0]}")
+                log.print(f"File {i} / {len(patient_loader)}: Loss: {lossval}")
+
+                del all_embeddings, prediction, truelabel, loss
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+                    gc.collect()
+            
+            pd.DataFrame(trainbatchloss).to_csv(outpath / "train-set-loss.csv", index = False, header = False)
+            pd.DataFrame(trainbatchacc).to_csv(outpath / "train-set-acc.csv", index = False, header = False)
+            pd.DataFrame(trainactualpreds).to_csv(outpath / "train-set-preds.csv", index = False)
+
+            log.print("Validation Set", "INFO")
+            patient_loader.set_mode(train = False)
+            for i in range(len(patient_loader)):
+                filepath, pattcr = patient_loader[i]
+                log.print(
+                    f"Processing {Path(filepath).stem} ; File {i} / {len(patient_loader)}.  True Label {pattcr[0]}"
+                )
+                pattcr_loader = torch.utils.data.DataLoader(
+                    TCRloader(*pattcr).data,
+                    batch_size=custom_configs["batch-size"],
+                    shuffle=True,
+                )
+
+                all_embeddings = []
+                for batchno, tcr in enumerate(pattcr_loader):
+                    log.print(f"Batch No.: {batchno} / {len(pattcr_loader)}")
+                    inputs = tokenizer(tcr, return_tensors="pt", padding=True)
+
+                    if torch.cuda.is_available():
+                        log.print(f"Pushing Tokens to cuda")
+                        start_mem = torch.cuda.memory_allocated()
+                        inputs = {k: v.to("cuda") for k, v in inputs.items()}
+                        log.print(
+                        f"Memory Reserved for Tokens: {(torch.cuda.memory_allocated() - start_mem)} bytes"
+                    )
+                        log.print(
+                        f"Current CUDA Memory Utilisation (Total): {(torch.cuda.memory_allocated())} bytes"
+                    )
+                        log.print(
+                        f"Current CUDA Memory Utilisation (Excluding BERT Model): {(torch.cuda.memory_allocated()) - bertmodel_gpu_usage} bytes"
+                    )
+                        log.print(
+                        f"Current CUDA Memory Utilisation (Excluding Both Models): {(torch.cuda.memory_allocated()) - classifier_gpu_usage - bertmodel_gpu_usage} bytes"
+                    )
+
+                    embeddings = bertmodel(**inputs).last_hidden_state
+                    embeddings = torch.mean(embeddings, dim=1)
+                    log.print(f"Embeddings Generated")
+
+                    all_embeddings = all_embeddings + embeddings.tolist()
+                    log.print(f"Required Embedding Vectors Extracted")
+                    del embeddings, inputs
+                    torch.cuda.empty_cache()
+                    gc.collect()
+
+                log.print(f"All Needed Embeddings Extracted")
+                all_embeddings = torch.from_numpy(np.array(all_embeddings)).to(torch.float32)
+                all_embeddings = all_embeddings.cuda() if torch.cuda.is_available() else all_embeddings
+                prediction     = classifier_model(all_embeddings)
+                truelabel      = torch.full_like(prediction, pattcr[0], dtype = torch.float32)
+                truelabel      = truelabel.cuda() if torch.cuda.is_available() else truelabel
+                loss           = criterion(prediction, truelabel)
+                testbatchloss.append(loss.data.tolist())
+                testbatchacc.append(int(pattcr[0] == int(prediction >= 0.5)))
+                testactualpreds["preds"].append(prediction.data.tolist()[0][0])
+                testactualpreds["actual"].append(pattcr[0])
+
+                log.print(f"File {i} / {len(patient_loader)}: Predicted Value: {prediction.data.tolist()[0][0]} ; True Value: {pattcr[0]}")
+                log.print(f"File {i} / {len(patient_loader)}: Loss: {loss.data.tolist()}")
+                secs_needed = projected_completion_time(start_time, custom_configs, [e, i])
+                log.print(f"Projected Time Needed: {secs_needed} seconds")
+                log.print(f"Projection Completion Time: {str(datetime.datetime.now() + datetime.timedelta(seconds = secs_needed))}")
+
+                del all_embeddings, prediction, truelabel, loss
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+                    gc.collect()
+
+            pd.DataFrame(testbatchloss).to_csv(outpath / "test-set-loss.csv", index = False, header = False)
+            pd.DataFrame(testbatchacc).to_csv(outpath / "test-set-acc.csv", index = False, header = False)
+            pd.DataFrame(testactualpreds).to_csv(outpath / "test-set-preds.csv", index = False)
+
 
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
