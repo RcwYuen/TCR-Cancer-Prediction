@@ -57,11 +57,10 @@ class PatientTCRloader(torch.utils.data.Dataset):
             return len(self.__testset)
 
     def ratio(self, positive=True):
-        return (
-            len(self.__positive_files) / len(self)
-            if positive
-            else len(self.__negative_files) / len(self)
-        )
+        if positive:
+            return sum([i[1] for i in self.__trainset]) / len(self.__trainset)
+        else:
+            return sum([(1 - i[1]) for i in self.__trainset]) / len(self.__trainset)
 
     def __filetype(self, filepath):
         return filepath.suffix[1::]

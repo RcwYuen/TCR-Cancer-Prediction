@@ -17,5 +17,5 @@
     "change-lr-at": 50,
     "train-split": 0.8,
     "bag-accummulate-loss": 4,
-    "train-bert": true
+    "train-bert": false
 }

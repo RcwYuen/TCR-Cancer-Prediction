@@ -1,5 +1,6 @@
 import torch
 from sparsemax import Sparsemax
+import copy
 
 class unidirectional(torch.nn.Module):
     def __init__(self):
@@ -26,7 +27,9 @@ class unidirectional(torch.nn.Module):
         return self.sig(result)
 
 def load_trained(path_to_trained, hypothesised_model):
-    model = hypothesised_model()
+    model = hypothesised_model() \
+        if isinstance(hypothesised_model, type) else \
+            copy.deepcopy(hypothesised_model)
     model.load_state_dict(torch.load(path_to_trained))
     return model.cuda() if torch.cuda.is_available() else model
 

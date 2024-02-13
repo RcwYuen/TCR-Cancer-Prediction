@@ -20,7 +20,6 @@ import datetime
 import gc
 
 global log, total_patients
-np.random.seed(42)
 
 def parse_command_line_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Model Trainer for TCR Data")
@@ -52,7 +51,6 @@ def default_configs(write_to=False):
         "change-lr-at": 50,
         "train-split": 0.8,
         "bag-accummulate-loss": 4,
-        "train-bert": True
     }
 
     if write_to:
@@ -90,6 +88,7 @@ def make_tcrargs(config):
         "negatives": config["negative-dir"],
         "cdr1": config["cdr1"],
         "cdr2": config["cdr2"],
+        "split": config["train-split"]
     }
 
 
@@ -101,7 +100,6 @@ def lr_lambda(epoch, change_epochs, new_lrs, optimizer):
 
 
 def load_llm(custom_configs):
-    log.print("Tokenizer Loaded")
     if custom_configs["maa-model"]:
         log.print("Loading Tokenizer")
         tokenizer = AutoTokenizer.from_pretrained(
@@ -144,8 +142,7 @@ def throw_to_cuda(models, names):
 
 def make_optimizer(custom_configs):
     scheduler = None
-    trainable_params = list(bertmodel.parameters()) + list(classifier_model.parameters()) \
-        if custom_configs["train-bert"] else list(classifier_model.parameters())
+    trainable_params = list(classifier_model.parameters())
     if isinstance(custom_configs["lr"], list) and isinstance(custom_configs["change-lr-at"], list):
         assert len(custom_configs["lr"]) == len(custom_configs["change-lr-at"])
         optimizer = torch.optim.Adam(
@@ -167,7 +164,6 @@ def make_optimizer(custom_configs):
             trainable_params,
             lr = custom_configs["lr"][0]
         )
-    
     else:
         log.print(
             "LR and Change LR Epoch are not both lists, Change LR Epoch will be ignored",
@@ -230,20 +226,19 @@ if __name__ == "__main__":
             ["Classifier", "BERT"]
         )
         classifier_model, bertmodel = models
-        if not custom_configs["train-bert"]:
-            log.print("Freezing BERT Layers")
-            for param in bertmodel.parameters():
-                param.requires_grad = False
         classifier_gpu_usage, bertmodel_gpu_usage = gpu_usages
+
+        for param in bertmodel.parameters():
+            param.requires_grad = False
 
         log.print("Setting Up Optimizer and Loss Function")
         optimizer, scheduler = make_optimizer(custom_configs)
+        optimizer.zero_grad()
         criterion = torch.nn.BCELoss()
         log.print("Optimizer and Loss Set")
 
         log.print("Loading Patient Data")
         patient_loader = PatientTCRloader(
-            split=custom_configs["train-split"], 
             **make_tcrargs(custom_configs),
             shuffle = True
         )
@@ -300,18 +295,15 @@ if __name__ == "__main__":
                             f"Current CUDA Memory Utilisation (Excluding Both Models): {(torch.cuda.memory_allocated()) - classifier_gpu_usage - bertmodel_gpu_usage} bytes"
                         )
 
-                    embeddings = bertmodel(**inputs).last_hidden_state
-                    embeddings = torch.mean(embeddings, dim=1)
-                    log.print(f"Embeddings Generated")
-
-                    all_embeddings = all_embeddings + embeddings.tolist()
-                    log.print(f"Required Embedding Vectors Extracted")
-                    del embeddings, inputs
+                    all_embeddings.append(
+                        torch.mean(bertmodel(**inputs).last_hidden_state, dim=1).cpu()
+                    )
+                    del inputs
                     torch.cuda.empty_cache()
                     gc.collect()
                 
                 log.print(f"All Needed Embeddings Extracted")
-                all_embeddings = torch.from_numpy(np.array(all_embeddings)).to(torch.float32)
+                all_embeddings = torch.cat(all_embeddings, dim = 0).to(torch.float32)
                 all_embeddings = all_embeddings.cuda() if torch.cuda.is_available() else all_embeddings
                 prediction     = classifier_model(all_embeddings)
                 truelabel      = torch.full_like(prediction, pattcr[0], dtype = torch.float32)
@@ -425,7 +417,6 @@ if __name__ == "__main__":
             pd.DataFrame(testbatchloss).to_csv(outpath / "test-loss.csv", index = False, header = False)
             pd.DataFrame(testbatchacc).to_csv(outpath / "test-acc.csv", index = False, header = False)
             pd.DataFrame(testactualpreds).to_csv(outpath / "test-preds.csv", index = False)
-            torch.save(bertmodel.state_dict(), outpath / f"bertmodel-{e}.pth")
             torch.save(classifier_model.state_dict(), outpath / f"classifier-{e}.pth")
 
             log.print(f"End of Epoch {e}")
