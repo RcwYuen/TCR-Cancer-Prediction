@@ -10,3 +10,4 @@ __pycache__
 *.pth
 *trained*
 subset
+good-results

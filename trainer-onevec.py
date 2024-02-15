@@ -42,7 +42,7 @@ def default_configs(write_to=False):
         "model-path": "model",
         "maa-model": True,
         "negative-dir": ["control"],
-        "positive-dir": ["lung_cancer", "pbmc_cancer"],
+        "positive-dir": ["pbmc_cancer"],
         "cdr1": False,
         "cdr2": False,
         "batch-size": 512,
@@ -260,8 +260,8 @@ if __name__ == "__main__":
             trainbatchacc  = []
             testbatchloss  = []
             testbatchacc   = []
-            trainactualpreds = {"preds": [], "actual": []}
-            testactualpreds  = {"preds": [], "actual": []}
+            trainactualpreds = {"preds": [], "actual": [], "tcr-count": []}
+            testactualpreds  = {"preds": [], "actual": [], "tcr-count": []}
             outpath = make_output_path(custom_configs["output-path"], e)
             make_directory_where_necessary(outpath)
             accummulatedloss = []
@@ -305,7 +305,9 @@ if __name__ == "__main__":
                     del inputs
                     torch.cuda.empty_cache()
                     gc.collect()
-                
+
+                trainactualpreds["tcr-count"].append(len(all_embeddings))
+
                 log.print(f"All Needed Embeddings Extracted")
                 all_embeddings = torch.cat(all_embeddings, dim = 0).to(torch.float32)
                 all_embeddings = all_embeddings.cuda() if torch.cuda.is_available() else all_embeddings
@@ -395,6 +397,7 @@ if __name__ == "__main__":
                         torch.cuda.empty_cache()
                         gc.collect()
 
+                    testactualpreds["tcr-count"].append(len(all_embeddings))
                     log.print(f"All Needed Embeddings Extracted")
                     all_embeddings = torch.from_numpy(np.array(all_embeddings)).to(torch.float32)
                     all_embeddings = all_embeddings.cuda() if torch.cuda.is_available() else all_embeddings
@@ -438,8 +441,8 @@ if __name__ == "__main__":
             trainbatchacc  = []
             testbatchloss  = []
             testbatchacc   = []
-            trainactualpreds = {"preds": [], "actual": []}
-            testactualpreds  = {"preds": [], "actual": []}
+            trainactualpreds = {"preds": [], "actual": [], "tcr-count": []}
+            testactualpreds  = {"preds": [], "actual": [], "tcr-count": []}
             patient_loader.set_mode(train = True)
             for i in range(len(patient_loader)):
                 filepath, pattcr = patient_loader[i]
@@ -485,6 +488,7 @@ if __name__ == "__main__":
                     gc.collect()
                 
                 log.print(f"All Needed Embeddings Extracted")
+                trainactualpreds["tcr-count"].append(len(all_embeddings))
                 all_embeddings = torch.from_numpy(np.array(all_embeddings)).to(torch.float32)
                 all_embeddings = all_embeddings.cuda() if torch.cuda.is_available() else all_embeddings
                 prediction     = classifier_model(all_embeddings)
@@ -555,6 +559,7 @@ if __name__ == "__main__":
                     gc.collect()
 
                 log.print(f"All Needed Embeddings Extracted")
+                testactualpreds["tcr-count"].append(len(all_embeddings))
                 all_embeddings = torch.from_numpy(np.array(all_embeddings)).to(torch.float32)
                 all_embeddings = all_embeddings.cuda() if torch.cuda.is_available() else all_embeddings
                 prediction     = classifier_model(all_embeddings)
