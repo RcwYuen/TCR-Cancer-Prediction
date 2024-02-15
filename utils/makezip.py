@@ -2,13 +2,13 @@ import zipfile
 import glob
 
 paths = [
-    "data/compressed/**",
-    "model/mlm-only/model/**",
-    "model/mlm-only/tokenizer/**",
-    "scripts/**",
-    "utils/**",
-    "trainer.py",
-    "model.py"
+    "data/trimmed/**",
+    # "model/mlm-only/model/**",
+    # "model/mlm-only/tokenizer/**",
+    # "scripts/**",
+    # "utils/**",
+    # "trainer.py",
+    # "model.py"
 ]
 files = []
 for path in paths:

@@ -24,7 +24,7 @@ For more details regarding this research, please view my dissertation [here](htt
 
 ### Downloading Required Files
 
-To download required files, we assume that you have access to the Chain Lab RDS, and you are connected to UCL's WiFi or UCL's VPN.
+To download required files, it is assume that you have access to the Chain Lab RDS, and you are connected to UCL's WiFi or UCL's VPN.
 
 #### Data Fetching
 
@@ -82,12 +82,16 @@ To modify the training configurations, you may modify the config.json as generat
 | `train-split`            | `float`                      | The proportion of data to be served as the training data                                                                                           |
 | `bag-accummulate-loss`   | `int`                        | The amount of patients to incur a step down the gradient                                                                                           |
 
+### Post-Training Files & Checkpoints
+
+Throughout training, checkpoints will be made with this current epoch's loss.  Individual item's accuracies, predictions with true labels and losses will be made as well inside each epoch checkpoint.
+
+You may run 
+
 ## Known Errors
 
-- If your path is too long in Windows, you are prone to the following error:
-
-```
-DLL load failed while importing $SOMETHING$: The filename or extension is too long.
-```
-
+- Path Length Problems: If your path is too long in Windows, you are prone to the following error: 
+\
+```DLL load failed while importing $SOMETHING$: The filename or extension is too long.```
+\
 A mitigation strategy is to use the global Python, or to put your files in a shorter directory.
