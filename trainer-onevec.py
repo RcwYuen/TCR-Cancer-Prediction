@@ -14,7 +14,7 @@ import pandas as pd
 from pathlib import Path
 import os
 import sys
-from model import unidirectional as classifier
+from model import oneinner as classifier
 import time
 import datetime
 import gc
