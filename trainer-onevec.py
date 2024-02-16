@@ -47,7 +47,7 @@ def default_configs(write_to=False):
         "cdr2": False,
         "batch-size": 512,
         "epoch": 50,
-        "lr": 0.01,
+        "lr": 0.001,
         "change-lr-at": 50,
         "train-split": 0.8,
         "bag-accummulate-loss": 4,
@@ -299,9 +299,12 @@ if __name__ == "__main__":
                             f"Current CUDA Memory Utilisation (Excluding Both Models): {(torch.cuda.memory_allocated()) - classifier_gpu_usage - bertmodel_gpu_usage} bytes"
                         )
 
-                    all_embeddings.append(
-                        torch.mean(bertmodel(**inputs).last_hidden_state, dim=1).cpu()
-                    )
+                    embeddings = bertmodel(**inputs).last_hidden_state
+                    embeddings = torch.mean(embeddings, dim=1)
+                    log.print(f"Embeddings Generated")
+
+                    all_embeddings = all_embeddings + embeddings.tolist()
+                    log.print(f"Required Embedding Vectors Extracted")
                     del inputs
                     torch.cuda.empty_cache()
                     gc.collect()
@@ -309,7 +312,7 @@ if __name__ == "__main__":
                 trainactualpreds["tcr-count"].append(len(all_embeddings))
 
                 log.print(f"All Needed Embeddings Extracted")
-                all_embeddings = torch.cat(all_embeddings, dim = 0).to(torch.float32)
+                all_embeddings = torch.from_numpy(np.array(all_embeddings)).to(torch.float32)
                 all_embeddings = all_embeddings.cuda() if torch.cuda.is_available() else all_embeddings
                 prediction     = classifier_model(all_embeddings)
                 truelabel      = torch.full_like(prediction, pattcr[0], dtype = torch.float32)
@@ -604,7 +607,6 @@ if __name__ == "__main__":
             log.close()
             pd.DataFrame(trainloss).to_csv(outpath / "trainloss.csv", index = False, header = False)
             pd.DataFrame(trainacc).to_csv(outpath / "trainacc.csv", index = False, header = False)
-            torch.save(bertmodel.state_dict(), outpath / "bertmodel-trained.pth")
             torch.save(classifier_model.state_dict(), outpath / "classifier-trained.pth")
         except NameError:
             pass

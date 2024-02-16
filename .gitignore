@@ -8,6 +8,3 @@ __pycache__
 *.log
 *.zip
 *.pth
-*trained*
-subset
-good-results
