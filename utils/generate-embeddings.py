@@ -114,7 +114,7 @@ if __name__ == "__main__":
             log.print("Loading Masked Amino Acid Model")
             model = AutoModelForMaskedLM.from_pretrained(
                 custom_configs["model-path"] + "/mlm-only/model"
-            ).bert
+            ).bert.eval()
 
         else:
             log.print("Loading Tokenizer")
@@ -124,7 +124,7 @@ if __name__ == "__main__":
             log.print("Loading Sequence Classification Model")
             model = AutoModelForSequenceClassification.from_pretrained(
                 custom_configs["model-path"] + "ordinary/model"
-            ).bert
+            ).bert.eval()
 
         if torch.cuda.is_available():
             log.print("Pushing Model to cuda")
@@ -185,7 +185,7 @@ if __name__ == "__main__":
                 )
                 make_directory_where_necessary(outpath.parent)
                 log.print(f"Exporting to {outpath}")
-                pd.DataFrame(all_embeddings).to_parquet(outpath, index=False)
+                pd.DataFrame(all_embeddings).mean(axis = 0).to_frame().to_parquet(outpath, index=False)
                 log.print("All TCRs Converted, freeing cuda memory")
                 torch.cuda.empty_cache()
                 log.print(f"cuda memory occupied: {torch.cuda.memory_allocated()} b")

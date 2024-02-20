@@ -53,7 +53,9 @@ def load_trained(path_to_trained, hypothesised_model):
     model = hypothesised_model() \
         if isinstance(hypothesised_model, type) else \
             copy.deepcopy(hypothesised_model)
-    model.load_state_dict(torch.load(path_to_trained))
+    model.load_state_dict(torch.load(path_to_trained,
+                                     map_location=torch.device('cpu' if not torch.cuda.is_available() else 'cuda')
+                                     ))
     return model.cuda() if torch.cuda.is_available() else model
 
 def reset_classifier(model):
