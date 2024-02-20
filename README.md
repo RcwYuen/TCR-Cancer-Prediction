@@ -20,6 +20,8 @@ For more details regarding this research, please view my dissertation [here](htt
 | Linux            | True  | ``requirements-linux.txt``   |
 | Linux            | False | ``requirements-linux.txt``   |
 
+   Note: You should install your own version of PyTorch depending on your CUDA.
+   
 4. To download all required files, please follow the subsection below.
 
 ### Downloading Required Files
