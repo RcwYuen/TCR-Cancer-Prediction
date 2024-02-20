@@ -65,33 +65,33 @@ This will continue the execution with the default setting.  If you want it to en
 
 To modify the training configurations, you may modify the config.json as generated.  The descriptions to the fields are as follows.
 
-| Field                    | Expected Datatype            | Descriptions                                                                                                                                       |
-| ------------------------ | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `input-path`             | `str`                        | The path to the Dataset                                                                                                                            |
-| `output-path`            | `str`                        | Location to flush all outputs                                                                                                                      |
-| `model-path`             | `str`                        | The path to the Model                                                                                                                              |
-| `maa-model`              | `bool`                       | Whether to use the Masked Amino Acid Model, for details, see [TCR-BERT](https://www.biorxiv.org/content/10.1101/2021.11.18.469186v1)'s white paper |
-| `negative-dir`           | `list[str]`                  | Directory Location to Control Data                                                                                                                 |
-| `positive-dir`           | `list[str]`                  | Directory Location to Cancer Patients                                                                                                              |
-| `cdr1`                   | `bool`                       | Whether to include CDR1 sequences into classification.  For TCR-BERT, this should be set to `false`                                                |
-| `cdr2`                   | `bool`                       | Whether to include CDR2 sequences into classification.  For TCR-BERT, this should be set to `false`                                                |
-| `batch-size`             | `int`                        | Amount of TCR sequences inside each patient to pass into the model at once                                                                         |
-| `epoch`                  | `int`                        | Amount of Epochs to train the model                                                                                                                |
-| `lr`                     | `float` or `list[float]`     | Learning Rate, or a List of Learning Rates                                                                                                         |
-| `change-lr-at`           | `float` or `list[float]`     | Epochs to change Learning Rate at.  This should be the same datatype as "lr"                                                                       |
-| `train-split`            | `float`                      | The proportion of data to be served as the training data                                                                                           |
-| `bag-accummulate-loss`   | `int`                        | The amount of patients to incur a step down the gradient                                                                                           |
+| Field                    | Expected Datatype            | Descriptions                                                                                                                                   |
+| ------------------------ | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `input-path`           | `str`                      | The path to the Dataset                                                                                                                        |
+| `output-path`          | `str`                      | Location to flush all outputs                                                                                                                  |
+| `model-path`           | `str`                      | The path to the Model                                                                                                                          |
+| `maa-model`            | `bool`                     | Whether to use the Masked Amino Acid Model, for details, see[TCR-BERT](https://www.biorxiv.org/content/10.1101/2021.11.18.469186v1)'s white paper |
+| `negative-dir`         | `list[str]`                | Directory Location to Control Data                                                                                                             |
+| `positive-dir`         | `list[str]`                | Directory Location to Cancer Patients                                                                                                          |
+| `cdr1`                 | `bool`                     | Whether to include CDR1 sequences into classification.  For TCR-BERT, this should be set to `false`                                          |
+| `cdr2`                 | `bool`                     | Whether to include CDR2 sequences into classification.  For TCR-BERT, this should be set to `false`                                          |
+| `batch-size`           | `int`                      | Amount of TCR sequences inside each patient to pass into the model at once                                                                     |
+| `epoch`                | `int`                      | Amount of Epochs to train the model                                                                                                            |
+| `lr`                   | `float` or `list[float]` | Learning Rate, or a List of Learning Rates                                                                                                     |
+| `change-lr-at`         | `float` or `list[float]` | Epochs to change Learning Rate at.  This should be the same datatype as "lr"                                                                   |
+| `train-split`          | `float`                    | The proportion of data to be served as the training data                                                                                       |
+| `bag-accummulate-loss` | `int`                      | The amount of patients to incur a step down the gradient                                                                                       |
 
 ### Post-Training Files & Checkpoints
 
 Throughout training, checkpoints will be made with this current epoch's loss.  Individual item's accuracies, predictions with true labels and losses will be made as well inside each epoch checkpoint.
 
-You may run 
+To analyse the loss 
 
 ## Known Errors
 
-- Path Length Problems: If your path is too long in Windows, you are prone to the following error: 
-\
-```DLL load failed while importing $SOMETHING$: The filename or extension is too long.```
-\
-A mitigation strategy is to use the global Python, or to put your files in a shorter directory.
+- Path Length Problems: If your path is too long in Windows, you are prone to the following error:
+
+  ``DLL load failed while importing $SOMETHING$: The filename or extension is too long.``
+
+  A mitigation strategy is to use the global Python, or to put your files in a shorter directory.
