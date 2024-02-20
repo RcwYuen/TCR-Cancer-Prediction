@@ -2,8 +2,4 @@ tcr-cancer
 tcr-cancer-rz
 model
 data
-data-embeddings
 __pycache__
-*.parquet
-*.log
-*.zip
