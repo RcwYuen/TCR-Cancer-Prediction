@@ -11,7 +11,8 @@ For more details regarding this research, please view my dissertation [here](htt
    ``python3 -m venv $YOUR-VENV-NAME-HERE``
 3. Activate your virtual environment, and run the following command
    ``python -m pip install -r scripts/requirements.txt``
-   Depending on your Operating System and CUDA requirements, please change ``requirements.txt`` to the following appropriately:
+   Depending on your Operating System and CUDA requirements, please change ``requirements.txt`` to the following appropriately.
+   Note: You should install your own version of PyTorch depending on your CUDA.
 
 | Operating System | CUDA  | Requirements Filename        |
 | ---------------- | ----- | ---------------------------- |
@@ -20,7 +21,6 @@ For more details regarding this research, please view my dissertation [here](htt
 | Linux            | True  | ``requirements-linux.txt``   |
 | Linux            | False | ``requirements-linux.txt``   |
 
-   Note: You should install your own version of PyTorch depending on your CUDA.
    
 4. To download all required files, please follow the subsection below.
 
