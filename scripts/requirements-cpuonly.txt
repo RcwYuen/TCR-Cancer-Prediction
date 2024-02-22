@@ -106,9 +106,6 @@ sympy==1.12
 terminado==0.18.0
 tinycss2==1.2.1
 tokenizers==0.15.0
-torch==2.1.2
-torchaudio==2.1.2
-torchvision==0.16.2
 tornado==6.4
 tqdm==4.66.1
 traitlets==5.14.1
