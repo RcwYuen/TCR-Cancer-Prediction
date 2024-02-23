@@ -3,8 +3,8 @@ import os
 from pathlib import Path
 
 # Define the origin and destination directories
-origin_dir = Path.cwd() / "data/compressed/control/"  # Update this to your actual origin directory
-destination_dir = Path.cwd() / "data/trimmed/control/"  # Update this to your actual destination directory
+origin_dir = Path.cwd() / "data/files/control/"  # Update this to your actual origin directory
+destination_dir = Path.cwd() / "data/full-trimmed/control/"  # Update this to your actual destination directory
 
 # Create the destination directory if it doesn't exist
 if not os.path.exists(destination_dir):

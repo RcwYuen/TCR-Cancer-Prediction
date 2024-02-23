@@ -79,7 +79,7 @@ class PatientTCRloader(torch.utils.data.Dataset):
             df = pd.read_csv(filepath, header=None, usecols=[0])
 
         df = df.dropna(axis=0, how="all")
-        df = df.map(lambda x: " ".join(list(x)))
+        df = df.applymap(lambda x: " ".join(list(x)))
         df = df.apply(lambda x: "|".join(x), axis = 1)
         return [str(filepath), (label, df.values.tolist())]
 
