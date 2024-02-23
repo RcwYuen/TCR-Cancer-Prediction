@@ -26,6 +26,24 @@ class unidirectional(torch.nn.Module):
         result = self.classifying_linear1(agg_out)
         return self.sig(result)
 
+class multidirectional(torch.nn.Module):
+    def __init__(self, directions = 4):
+        super(multidirectional, self).__init__()
+        self.last_scores = None
+        self.last_weights = None
+
+        self.scoring_linear1 = torch.nn.Linear(768, directions)
+        self.sparsemax = Sparsemax(dim = 0)
+        self.classifying_linear1 = torch.nn.Linear(768, 1)
+        self.sig = torch.nn.Sigmoid()
+
+    def forward(self, x):
+        self.last_scores, _ = torch.max(self.scoring_linear1(x), dim = 1, keepdim = True)
+        self.last_weights = self.sparsemax(self.last_scores.T).T
+        agg_out = torch.sum(self.last_weights * x, dim = 0, keepdim = True)
+        result = self.classifying_linear1(agg_out)
+        return self.sig(result)
+
 class oneinner(torch.nn.Module):
     def __init__(self):
         super(oneinner, self).__init__()
