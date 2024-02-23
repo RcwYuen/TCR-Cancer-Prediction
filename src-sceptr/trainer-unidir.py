@@ -1,8 +1,7 @@
 import torch
-from sparsemax import Sparsemax
 import numpy as np
 from utils.logger import Logger
-from utils.dataloader import PatientTCRloader, TCRloader
+from utils.dataloader import PatientTCRloader
 import argparse
 import json
 import pandas as pd
