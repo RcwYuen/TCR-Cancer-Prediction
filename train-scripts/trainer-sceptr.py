@@ -13,7 +13,9 @@ from model import unidirectional as classifier
 import time
 import datetime
 import gc
+import warnings
 
+warnings.filterwarnings("ignore")
 global log, total_patients
 
 def parse_command_line_arguments() -> argparse.Namespace:

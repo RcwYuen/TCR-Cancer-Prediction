@@ -5,7 +5,7 @@ import random
 import numpy as np
 
 
-class PatientTCRloader(torch.utils.data.Dataset):
+class PatientTCRloader_SCEPTR(torch.utils.data.Dataset):
     def __init__(
         self,
         split = 0.8,
@@ -14,7 +14,7 @@ class PatientTCRloader(torch.utils.data.Dataset):
         negatives=["control"],
         shuffle=False
     ):
-        super(PatientTCRloader, self).__init__()
+        super(PatientTCRloader_SCEPTR, self).__init__()
 
         self.__positive_files = self.__load_files(
             [Path.cwd() / path / i for i in positives]
