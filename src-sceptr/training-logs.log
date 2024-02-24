@@ -1,0 +1,70 @@
+[2024-02-24 16:35:48.942275]: Instanciating
+[2024-02-24 16:35:48.942831]: [INFO] Arguments: python trainer-unidir.py
+[2024-02-24 16:35:48.942831]: Torch CUDA Device Count: 1
+[2024-02-24 16:35:48.942831]: CUDA Device 0: NVIDIA GeForce RTX 3060 Ti
+[2024-02-24 16:35:48.942831]: [INFO] Config: input-path: data/sceptr
+[2024-02-24 16:35:48.943839]: [INFO] Config: output-path: trained
+[2024-02-24 16:35:48.943839]: [INFO] Config: negative-dir: ['control']
+[2024-02-24 16:35:48.943839]: [INFO] Config: positive-dir: ['pbmc_cancer']
+[2024-02-24 16:35:48.943839]: [INFO] Config: epoch: 50
+[2024-02-24 16:35:48.943839]: [INFO] Config: lr: 0.001
+[2024-02-24 16:35:48.944843]: [INFO] Config: change-lr-at: 50
+[2024-02-24 16:35:48.944843]: [INFO] Config: train-split: 0.8
+[2024-02-24 16:35:48.944843]: [INFO] Config: bag-accummulate-loss: 4
+[2024-02-24 16:35:48.944843]: [INFO] Config: l2-penalty: 0
+[2024-02-24 16:35:48.945873]: Pushing Classifier Model to cuda
+[2024-02-24 16:35:48.945873]: Memory Reserved for Classifier Model: 2048 bytes
+[2024-02-24 16:35:48.946868]: Setting Up Optimizer and Loss Function
+[2024-02-24 16:35:48.946868]: [WARN] LR and Change LR Epoch are not both lists, Change LR Epoch will be ignored
+[2024-02-24 16:35:53.101343]: Optimizer and Loss Set
+[2024-02-24 16:35:53.101343]: Loading Patient Data
+[2024-02-24 16:35:53.104387]: Data Loaded
+[2024-02-24 16:35:53.104387]: Commencing Training
+[2024-02-24 16:35:53.135176]: Processing dcr_TCV_0078 ; File 0 / 152.  True Label 0
+[2024-02-24 16:35:57.257979]: All Needed Embeddings Extracted
+[2024-02-24 16:35:57.457908]: File 0 / 152: Predicted Value: 0.48766395449638367 ; True Value: 0
+[2024-02-24 16:35:57.457908]: File 0 / 152: Loss: 0.6687745451927185
+[2024-02-24 16:35:57.457908]: Projected Time Needed: 42185.61492204666 seconds
+[2024-02-24 16:35:57.457908]: Projected Completion Time: 2024-02-25 04:19:03.072830
+[2024-02-24 16:35:57.519478]: Processing dcr_HCW_0078 ; File 1 / 152.  True Label 0
+[2024-02-24 16:36:05.636709]: All Needed Embeddings Extracted
+[2024-02-24 16:36:05.654254]: File 1 / 152: Predicted Value: 0.4873710870742798 ; True Value: 0
+[2024-02-24 16:36:05.655268]: File 1 / 152: Loss: 0.6682030558586121
+[2024-02-24 16:36:05.655268]: Projected Time Needed: 60802.7425634861 seconds
+[2024-02-24 16:36:05.656281]: Projected Completion Time: 2024-02-25 09:29:28.398844
+[2024-02-24 16:36:05.799870]: Processing dcr_TCV_0070 ; File 2 / 152.  True Label 0
+[2024-02-24 16:36:18.222747]: All Needed Embeddings Extracted
+[2024-02-24 16:36:18.239797]: File 2 / 152: Predicted Value: 0.4835071265697479 ; True Value: 0
+[2024-02-24 16:36:18.240790]: File 2 / 152: Loss: 0.6606937646865845
+[2024-02-24 16:36:18.240790]: Projected Time Needed: 81173.82435862224 seconds
+[2024-02-24 16:36:18.240790]: Projected Completion Time: 2024-02-25 15:09:12.065149
+[2024-02-24 16:36:18.304422]: Processing dcr_TCV_0022 ; File 3 / 152.  True Label 0
+[2024-02-24 16:36:22.417891]: All Needed Embeddings Extracted
+[2024-02-24 16:36:22.427400]: File 3 / 152: Predicted Value: 0.4987337589263916 ; True Value: 0
+[2024-02-24 16:36:22.427400]: File 3 / 152: Loss: 0.6906179189682007
+[2024-02-24 16:36:22.428413]: Projected Time Needed: 71015.45907175541 seconds
+[2024-02-24 16:36:22.429401]: Projected Completion Time: 2024-02-25 12:19:57.888473
+[2024-02-24 16:36:22.429401]: Updating Network
+[2024-02-24 16:36:22.429401]: Accummulated Loss (Unnormalised): [0.6688, 0.6682, 0.6607, 0.6906]
+[2024-02-24 16:36:22.429401]: Accummulated Loss (Average): 0.6720723211765289
+[2024-02-24 16:36:22.552298]: Clearing Gradients
+[2024-02-24 16:36:22.596952]: Processing dcr_TCV_0017 ; File 4 / 152.  True Label 0
+[2024-02-24 16:36:26.879066]: All Needed Embeddings Extracted
+[2024-02-24 16:36:26.892592]: File 4 / 152: Predicted Value: 0.49691036343574524 ; True Value: 0
+[2024-02-24 16:36:26.892592]: File 4 / 152: Loss: 0.6869869232177734
+[2024-02-24 16:36:26.892592]: Projected Time Needed: 65454.51054849625 seconds
+[2024-02-24 16:36:26.892592]: Projected Completion Time: 2024-02-25 10:47:21.403140
+[2024-02-24 16:36:26.944226]: Processing L_T_X_0_0_9_2_c_a_n_c_e_r ; File 5 / 152.  True Label 1
+[2024-02-24 16:36:32.258579]: All Needed Embeddings Extracted
+[2024-02-24 16:36:32.271101]: File 5 / 152: Predicted Value: 0.48538804054260254 ; True Value: 1
+[2024-02-24 16:36:32.271101]: File 5 / 152: Loss: 0.7228066325187683
+[2024-02-24 16:36:32.271101]: Projected Time Needed: 63221.60449067751 seconds
+[2024-02-24 16:36:32.271101]: Projected Completion Time: 2024-02-25 10:10:13.875592
+[2024-02-24 16:36:32.584069]: Processing dcr_HCW_0030 ; File 6 / 152.  True Label 0
+[2024-02-24 16:37:02.266856]: All Needed Embeddings Extracted
+[2024-02-24 16:37:02.325410]: File 6 / 152: Predicted Value: 0.47973209619522095 ; True Value: 0
+[2024-02-24 16:37:02.325410]: File 6 / 152: Loss: 0.6534113883972168
+[2024-02-24 16:37:02.325410]: Projected Time Needed: 95762.34074633462 seconds
+[2024-02-24 16:37:02.325410]: Projected Completion Time: 2024-02-25 19:13:04.666156
+[2024-02-24 16:37:02.538515]: Processing dcr_HCW_0004 ; File 7 / 152.  True Label 0
+[2024-02-24 16:37:14.614356]: [INFO] Interrupted

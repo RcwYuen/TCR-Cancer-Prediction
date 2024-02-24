@@ -305,9 +305,6 @@ if __name__ == "__main__":
 
                     all_embeddings = all_embeddings + embeddings.tolist()
                     log.print(f"Required Embedding Vectors Extracted")
-                    del inputs
-                    torch.cuda.empty_cache()
-                    gc.collect()
 
                 trainactualpreds["tcr-count"].append(len(all_embeddings))
 
@@ -343,11 +340,6 @@ if __name__ == "__main__":
                     optimizer.zero_grad()
                     accummulatedloss = []
 
-                del all_embeddings, prediction, truelabel, loss
-                if torch.cuda.is_available():
-                    torch.cuda.empty_cache()
-                    gc.collect()
-            
             pd.DataFrame(trainbatchloss).to_csv(outpath / "train-loss.csv", index = False, header = False)
             pd.DataFrame(trainbatchacc).to_csv(outpath / "train-acc.csv", index = False, header = False)
             pd.DataFrame(trainactualpreds).to_csv(outpath / "train-preds.csv", index = False)
@@ -396,9 +388,6 @@ if __name__ == "__main__":
 
                         all_embeddings = all_embeddings + embeddings.tolist()
                         log.print(f"Required Embedding Vectors Extracted")
-                        del embeddings, inputs
-                        torch.cuda.empty_cache()
-                        gc.collect()
 
                     testactualpreds["tcr-count"].append(len(all_embeddings))
                     log.print(f"All Needed Embeddings Extracted")
@@ -418,11 +407,6 @@ if __name__ == "__main__":
                     secs_needed = projected_completion_time(start_time, custom_configs, [e, i])
                     log.print(f"Projected Time Needed: {secs_needed} seconds")
                     log.print(f"Projection Completion Time: {str(datetime.datetime.now() + datetime.timedelta(seconds = secs_needed))}")
-
-                    del all_embeddings, prediction, truelabel, loss
-                    if torch.cuda.is_available():
-                        torch.cuda.empty_cache()
-                        gc.collect()
 
             pd.DataFrame(testbatchloss).to_csv(outpath / "test-loss.csv", index = False, header = False)
             pd.DataFrame(testbatchacc).to_csv(outpath / "test-acc.csv", index = False, header = False)
@@ -486,10 +470,7 @@ if __name__ == "__main__":
 
                     all_embeddings = all_embeddings + embeddings.tolist()
                     log.print(f"Required Embedding Vectors Extracted")
-                    del embeddings, inputs
-                    torch.cuda.empty_cache()
-                    gc.collect()
-                
+
                 log.print(f"All Needed Embeddings Extracted")
                 trainactualpreds["tcr-count"].append(len(all_embeddings))
                 all_embeddings = torch.from_numpy(np.array(all_embeddings)).to(torch.float32)
@@ -506,11 +487,6 @@ if __name__ == "__main__":
                 trainbatchacc.append(int(pattcr[0] == int(prediction >= 0.5)))
                 log.print(f"File {i} / {len(patient_loader)}: Predicted Value: {prediction.data.tolist()[0][0]} ; True Value: {pattcr[0]}")
                 log.print(f"File {i} / {len(patient_loader)}: Loss: {lossval}")
-
-                del all_embeddings, prediction, truelabel, loss
-                if torch.cuda.is_available():
-                    torch.cuda.empty_cache()
-                    gc.collect()
             
             pd.DataFrame(trainbatchloss).to_csv(outpath / "train-set-loss.csv", index = False, header = False)
             pd.DataFrame(trainbatchacc).to_csv(outpath / "train-set-acc.csv", index = False, header = False)
@@ -557,9 +533,6 @@ if __name__ == "__main__":
 
                     all_embeddings = all_embeddings + embeddings.tolist()
                     log.print(f"Required Embedding Vectors Extracted")
-                    del embeddings, inputs
-                    torch.cuda.empty_cache()
-                    gc.collect()
 
                 log.print(f"All Needed Embeddings Extracted")
                 testactualpreds["tcr-count"].append(len(all_embeddings))
@@ -579,11 +552,6 @@ if __name__ == "__main__":
                 secs_needed = projected_completion_time(start_time, custom_configs, [e, i])
                 log.print(f"Projected Time Needed: {secs_needed} seconds")
                 log.print(f"Projection Completion Time: {str(datetime.datetime.now() + datetime.timedelta(seconds = secs_needed))}")
-
-                del all_embeddings, prediction, truelabel, loss
-                if torch.cuda.is_available():
-                    torch.cuda.empty_cache()
-                    gc.collect()
 
             pd.DataFrame(testbatchloss).to_csv(outpath / "test-set-loss.csv", index = False, header = False)
             pd.DataFrame(testbatchacc).to_csv(outpath / "test-set-acc.csv", index = False, header = False)
