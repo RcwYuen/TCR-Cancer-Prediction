@@ -4,7 +4,7 @@ import copy
 
 class sceptr_unidirectional(torch.nn.Module):
     def __init__(self):
-        super(unidirectional, self).__init__()
+        super(sceptr_unidirectional, self).__init__()
         self.last_scores = None
         self.last_weights = None
 

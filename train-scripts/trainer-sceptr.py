@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 from utils.logger import Logger
-from utils.dataloader import PatientTCRloader
+from utils.dataloader import PatientTCRloader_SCEPTR as PatientTCRloader
 import argparse
 import json
 import pandas as pd
@@ -9,7 +9,7 @@ from pathlib import Path
 import os
 import sys
 from sceptr import sceptr
-from model import unidirectional as classifier
+from model import sceptr_unidirectional as classifier
 import time
 import datetime
 import gc
