@@ -26,7 +26,8 @@ def parse_command_line_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--end", action="store_true", 
         help = "End after making Configuration Template.  Not applied \
-            if Config Template is not going to be produce.")
+            if Config Template is not going to be produce."
+        )
     return parser.parse_args()
 
 
@@ -192,6 +193,8 @@ if __name__ == "__main__":
             [classifier_model],
             ["Classifier"]
         )
+        classifier_model = classifier_model[0]
+        classifier_gpu_usage = classifier_gpu_usage[0]
 
         log.print("Setting Up Optimizer and Loss Function")
         optimizer, scheduler = make_optimizer(custom_configs)
@@ -262,11 +265,6 @@ if __name__ == "__main__":
                     log.print(f"Clearing Gradients")
                     optimizer.zero_grad()
                     accummulatedloss = []
-
-                del all_embeddings, prediction, truelabel, loss
-                if torch.cuda.is_available():
-                    torch.cuda.empty_cache()
-                    gc.collect()
             
             pd.DataFrame(trainbatchloss).to_csv(outpath / "train-loss.csv", index = False, header = False)
             pd.DataFrame(trainbatchacc).to_csv(outpath / "train-acc.csv", index = False, header = False)
@@ -301,11 +299,6 @@ if __name__ == "__main__":
                     secs_needed = projected_completion_time(start_time, custom_configs, [e, i])
                     log.print(f"Projected Time Needed: {secs_needed} seconds")
                     log.print(f"Projection Completion Time: {str(datetime.datetime.now() + datetime.timedelta(seconds = secs_needed))}")
-
-                    del all_embeddings, prediction, truelabel, loss
-                    if torch.cuda.is_available():
-                        torch.cuda.empty_cache()
-                        gc.collect()
 
             pd.DataFrame(testbatchloss).to_csv(outpath / "test-loss.csv", index = False, header = False)
             pd.DataFrame(testbatchacc).to_csv(outpath / "test-acc.csv", index = False, header = False)
@@ -352,11 +345,6 @@ if __name__ == "__main__":
                 trainbatchacc.append(int(pattcr[0] == int(prediction >= 0.5)))
                 log.print(f"File {i} / {len(patient_loader)}: Predicted Value: {prediction.data.tolist()[0][0]} ; True Value: {pattcr[0]}")
                 log.print(f"File {i} / {len(patient_loader)}: Loss: {lossval}")
-
-                del all_embeddings, prediction, truelabel, loss
-                if torch.cuda.is_available():
-                    torch.cuda.empty_cache()
-                    gc.collect()
             
             pd.DataFrame(trainbatchloss).to_csv(outpath / "train-set-loss.csv", index = False, header = False)
             pd.DataFrame(trainbatchacc).to_csv(outpath / "train-set-acc.csv", index = False, header = False)
@@ -389,11 +377,6 @@ if __name__ == "__main__":
                 secs_needed = projected_completion_time(start_time, custom_configs, [e, i])
                 log.print(f"Projected Time Needed: {secs_needed} seconds")
                 log.print(f"Projection Completion Time: {str(datetime.datetime.now() + datetime.timedelta(seconds = secs_needed))}")
-
-                del all_embeddings, prediction, truelabel, loss
-                if torch.cuda.is_available():
-                    torch.cuda.empty_cache()
-                    gc.collect()
 
             pd.DataFrame(testbatchloss).to_csv(outpath / "test-set-loss.csv", index = False, header = False)
             pd.DataFrame(testbatchacc).to_csv(outpath / "test-set-acc.csv", index = False, header = False)
