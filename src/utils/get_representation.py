@@ -16,6 +16,8 @@ def quantify_repertoire(repertoire, method = "atchley", replace_unrecognised = T
         df = kidera.copy()
     elif method.lower() == "aa_prop":
         df = aa_prop.copy()
+    elif method.lower() == "rand":
+        df = rand.copy()
     
     rep = []
     for tcr in repertoire:
@@ -33,5 +35,6 @@ dir = Path(__file__).resolve().parent
 atchley = _get_df(dir / "atchley.txt")
 kidera = _get_df(dir / "kidera.txt")
 aa_prop = _get_df(dir / "aa_properties.txt")
+rand = _get_df(dir / "random.txt")
 
 print (aa_prop)
