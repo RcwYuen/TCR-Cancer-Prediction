@@ -190,7 +190,9 @@ if __name__ == "__main__":
         # In case config.json does not exist
         custom_configs = default_configs(write_to=False) 
         custom_configs = load_configs(json.load(open(config_file, "r")))
-        classifier_model = classifier()
+        classifier_model = classifier(indim = 5 if custom_configs["encoding"] == "atchley" else
+                                      16 if custom_configs["encoding"] == "aa_prop" else
+                                      10)
         classifier_model, classifier_gpu_usage = throw_to_cuda(
             [classifier_model],
             ["Classifier"]

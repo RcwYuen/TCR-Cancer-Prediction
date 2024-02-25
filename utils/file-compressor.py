@@ -9,13 +9,13 @@ def make_directory_where_necessary(directory):
             os.mkdir(directory)
     return True
 
-folders = ["pbmc_cancer", "lung_cancer"]# , "control"]
+folders = ["pbmc_cancer" , "control"]
 
-for dir in [Path.cwd() / "data" / "compressed" / folder for folder in folders]:
+for dir in [Path.cwd() / "data" / "trimmed" / folder for folder in folders]:
     make_directory_where_necessary(dir)
 
 
-files = [Path.cwd() / "data" / "files" / folder for folder in folders]
+files = [Path.cwd() / "data" / "full-trimmed" / folder for folder in folders]
 
 files = sum([list(i.glob("*")) for i in files], [])
 for i in tqdm(files):
@@ -25,4 +25,4 @@ for i in tqdm(files):
         df = pd.read_csv(i, header = None, usecols = [0])
 
     df = df.dropna(axis=0, how="all")
-    df.to_csv(str(i).replace("data\\files", "data\\compressed"), sep = "\t")
+    df.to_csv(str(i).replace("data\\full-trimmed", "data\\trimmed"), sep = "\t", index = False)

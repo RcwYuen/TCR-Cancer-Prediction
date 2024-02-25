@@ -1,6 +1,7 @@
 import torch
 from sparsemax import Sparsemax
 import copy
+import numpy as np
 
 class sceptr_unidirectional(torch.nn.Module):
     def __init__(self):
@@ -21,15 +22,17 @@ class sceptr_unidirectional(torch.nn.Module):
         return self.sig(result)
 
 class aa_encoding_unidirectional(torch.nn.Module):
-    def __init__(self, indim = 5):
+    def __init__(self, indim = 5, enforce_param = 1538):
         super(aa_encoding_unidirectional, self).__init__()
         self.last_scores = None
         self.last_weights = None
 
-        self.upscale = torch.nn.Linear(indim, 768)
-        self.scoring_linear1 = torch.nn.Linear(768, 1)
+        n = int(np.ceil((enforce_param - 2) / (indim + 3)))
+        
+        self.upscale = torch.nn.Linear(indim, n)
+        self.scoring_linear1 = torch.nn.Linear(n, 1)
         self.sparsemax = Sparsemax(dim = 0)
-        self.classifying_linear1 = torch.nn.Linear(768, 1)
+        self.classifying_linear1 = torch.nn.Linear(n, 1)
         self.sig = torch.nn.Sigmoid()
 
     def forward(self, x):
@@ -38,7 +41,6 @@ class aa_encoding_unidirectional(torch.nn.Module):
         self.last_weights = self.sparsemax(self.last_scores.T).T
         agg_out = torch.sum(self.last_weights * x, dim = 0, keepdim = True)
         result = self.classifying_linear1(agg_out)
-        print (self.sig(result))
         return self.sig(result)
     
 class unidirectional(torch.nn.Module):
