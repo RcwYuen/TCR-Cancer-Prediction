@@ -87,7 +87,9 @@ def make_tcrargs(config):
 def lr_lambda(epoch, change_epochs, new_lrs, optimizer):
     for change_epoch, new_lr in zip(change_epochs, new_lrs):
         if epoch == change_epoch:
-            return new_lr[change_epoch.index(epoch)] / optimizer.param_groups[0]['lr']
+            change_lr = new_lr[change_epoch.index(epoch)] / optimizer.param_groups[0]['lr']
+            log.print(f"Changing Learning Rate to {change_lr}")
+            return change_lr
     return 1
 
 
