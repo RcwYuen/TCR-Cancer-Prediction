@@ -10,7 +10,7 @@ warnings.simplefilter("ignore")
 
 evalpath = Path.cwd() / "data" / "sceptr-eval"
 model = load_trained(
-    Path.cwd() / "good-results" / "sceptr" / "trained-sceptr-caneval" / "Epoch 48" / "classifier-48.pth",
+    Path.cwd() / "results" / "sceptr" / "eval" / "trained-sceptr-caneval-2" / "Epoch 23" / "classifier-23.pth",
     sceptr_unidirectional
 )
 
