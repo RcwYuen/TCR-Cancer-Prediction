@@ -54,8 +54,7 @@ def getstats(foldername, rolling_window = 20, endofepoch = False):
         "epochwiseauc": epochwiseauc
     }
 
-def find_bestepoch(stats, focus_last = True):
-    auc = stats["aucstats"]["test-preds.csv"]
+def find_bestepoch(stats, focus_last = True, avoid_premature = 0):
+    auc = stats["aucstats"]["test-preds.csv"][avoid_premature:]
     auc = auc[::-1] if focus_last else auc
-    best = np.argmax(auc)
-    return len(auc) - best - 1 if focus_last else best
+    return len(auc) - np.argmax(auc) - 1 + avoid_premature if focus_last else np.argmax(auc) + avoid_premature
