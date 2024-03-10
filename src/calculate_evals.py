@@ -5,12 +5,13 @@ from tqdm import tqdm
 import warnings
 import pandas as pd
 import torch
-
+# 9: 38
+# 8: 34
 warnings.simplefilter("ignore")
 
 evalpath = Path.cwd() / "data" / "sceptr-eval"
 model = load_trained(
-    Path.cwd() / "results" / "sceptr" / "eval" / "trained-sceptr-caneval-1" / "Epoch 48" / "classifier-48.pth",
+    Path.cwd() / "results" / "sceptr" / "eval" / "trained-sceptr-caneval-9" / "Epoch 38" / "classifier-38.pth",
     sceptr_unidirectional
 )
 
