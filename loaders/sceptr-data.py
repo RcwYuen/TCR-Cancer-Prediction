@@ -54,7 +54,7 @@ for file in org_path.glob("*/*"):
 required_rows = ['TRAV', 'TRBV', 'TRAJ', 'TRBJ', 'CDR3A', 'CDR3B']
 
 for patientid, pair in tqdm(pairs.items()):
-    exportdf = {}
+    exportdf = {"TRAV": [], "TRAJ": [], "CDR3A": [], "TRBV": [], "TRBJ": [], "CDR3B": []}
     for fname, chain in pair:
         if fname.suffix == ".tsv":
             df = pd.read_csv(fname, delimiter="\t")
@@ -67,20 +67,26 @@ for patientid, pair in tqdm(pairs.items()):
         df = df[["v_call", "j_call", "junction_aa"]]
         df = df.dropna(axis=0, how="all")
         df = cleandf(df)
-        exportdf["TRAV" if chain.lower() == "alpha" else "TRBV"]   = df["v_call"].values.tolist()
-        exportdf["TRAJ" if chain.lower() == "alpha" else "TRBJ"]   = df["j_call"].values.tolist()
-        exportdf["CDR3A" if chain.lower() == "alpha" else "CDR3B"] = df["junction_aa"].values.tolist()
+        if chain.lower() == "alpha":
+            exportdf["TRAV"]  += df["v_call"].values.tolist()
+            exportdf["TRAJ"]  += df["j_call"].values.tolist()
+            exportdf["CDR3A"] += df["junction_aa"].values.tolist()
+            exportdf["TRBV"]  += [""] * len(df["v_call"].values.tolist())
+            exportdf["TRBJ"]  += [""] * len(df["j_call"].values.tolist())
+            exportdf["CDR3B"] += [""] * len(df["junction_aa"].values.tolist())
+        else:
+            exportdf["TRBV"]  += df["v_call"].values.tolist()
+            exportdf["TRBJ"]  += df["j_call"].values.tolist()
+            exportdf["CDR3B"] += df["junction_aa"].values.tolist()
+            exportdf["TRAV"]  += [""] * len(df["v_call"].values.tolist())
+            exportdf["TRAJ"]  += [""] * len(df["j_call"].values.tolist())
+            exportdf["CDR3A"] += [""] * len(df["junction_aa"].values.tolist())
     
     for r in required_rows:
         if r not in exportdf.keys():
             exportdf[r] = []
-
-    max_length = max(len(lst) for lst in exportdf.values())
-    for key in exportdf:
-        exportdf[key] += [None] * (max_length - len(exportdf[key]))
     
     exportpath = Path(str(fname.parent).replace(str(org_path), str(des_path)))
     make_directory_where_necessary(exportpath)
     exportdf = pd.DataFrame(exportdf)
     exportdf.to_csv(exportpath / (f"{patientid}.tsv"), index = False, sep = "\t")
-    
