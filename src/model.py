@@ -22,21 +22,17 @@ class sceptr_unidirectional(torch.nn.Module):
         return self.sig(result)
 
 class aa_encoding_unidirectional(torch.nn.Module):
-    def __init__(self, indim = 5, enforce_param = 1538):
+    def __init__(self, indim = 5):
         super(aa_encoding_unidirectional, self).__init__()
         self.last_scores = None
         self.last_weights = None
 
-        n = int(np.ceil((enforce_param - 2) / (indim + 3)))
-        
-        self.upscale = torch.nn.Linear(indim, n)
-        self.scoring_linear1 = torch.nn.Linear(n, 1)
+        self.scoring_linear1 = torch.nn.Linear(indim, 1)
         self.sparsemax = Sparsemax(dim = 0)
-        self.classifying_linear1 = torch.nn.Linear(n, 1)
+        self.classifying_linear1 = torch.nn.Linear(indim, 1)
         self.sig = torch.nn.Sigmoid()
 
     def forward(self, x):
-        x = self.upscale(x)
         self.last_scores = self.scoring_linear1(x)
         self.last_weights = self.sparsemax(self.last_scores.T).T
         agg_out = torch.sum(self.last_weights * x, dim = 0, keepdim = True)
