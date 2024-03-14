@@ -5,26 +5,30 @@ from tqdm import tqdm
 import warnings
 import pandas as pd
 import torch
-# 9: 38
-# 8: 34
+
+bestepochs = [49, 44, 49, 49, 49, 47, 49, 18, 18, 49]
+
 warnings.simplefilter("ignore")
 
-evalpath = Path.cwd() / "data" / "sceptr-eval"
-model = load_trained(
-    Path.cwd() / "results" / "sceptr" / "eval" / "trained-sceptr-caneval-9" / "Epoch 38" / "classifier-38.pth",
-    sceptr_unidirectional
-)
+for i, bestepoch in enumerate(bestepochs):
+    path = Path.cwd() / "results" / "sceptr" / "eval" / f"trained-sceptr-caneval-{i}"
 
-preds = {
-    "preds": [],
-    "actual": [],
-}
+    evalpath = Path.cwd() / "data" / "sceptr-eval"
+    model = load_trained(
+        path / f"Epoch {bestepoch}" / f"classifier-{bestepoch}.pth",
+        sceptr_unidirectional
+    )
 
-for file in tqdm(list(evalpath.glob("*/*.tsv"))):
-    df = pd.read_csv(file, sep = "\t")
-    embedding = sceptr.calc_vector_representations(df)
-    embedding = torch.from_numpy(embedding).cuda() if torch.cuda.is_available() else torch.from_numpy(embedding)
-    preds["preds"].append(model(embedding).item())
-    preds["actual"].append(1 if "cancer" in str(file) else 0)
+    preds = {
+        "preds": [],
+        "actual": [],
+    }
 
-pd.DataFrame(preds).to_csv("eval-set-auc.csv", index = False)
+    for file in tqdm(list(evalpath.glob("*/*.tsv"))):
+        df = pd.read_csv(file, sep = "\t")
+        embedding = sceptr.calc_vector_representations(df)
+        embedding = torch.from_numpy(embedding).cuda() if torch.cuda.is_available() else torch.from_numpy(embedding)
+        preds["preds"].append(model(embedding).item())
+        preds["actual"].append(1 if "cancer" in str(file) else 0)
+
+    pd.DataFrame(preds).to_csv(path / f"eval-set-auc-{bestepoch}.csv", index = False)
