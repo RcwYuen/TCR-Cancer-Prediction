@@ -4,7 +4,6 @@ from pathlib import Path
 
 def _get_df(fname):
     df = pd.read_csv(fname, delimiter = "\t").set_index("amino.acid").sort_index()
-    print (df)
     df = (df.max() - df) / (df.max() - df.min())
     return df
 
@@ -36,5 +35,3 @@ atchley = _get_df(dir / "atchley.txt")
 kidera = _get_df(dir / "kidera.txt")
 aa_prop = _get_df(dir / "aa_properties.txt")
 rand = _get_df(dir / "random.txt")
-
-print (aa_prop)
