@@ -60,7 +60,7 @@ Please refer to SCEPTR's repository for downloading instructions
 
 ---
 
-## Usage
+## Training Classifiers
 
 There are 3 training scripts, where `trainer-sceptr.py` trains a classifier that uses SCEPTR to encode TCRs, `trainer-symbolic.py` trains a classifier that takes in TCRs encoded by physico-chemical properties and `trainer-tcrbert.py` trains a classifier that uses TCR-BERT to encode TCRs.
 
@@ -95,6 +95,15 @@ To specify which configuration file to run, you may use the following command:
 ``
 python trainer.py -c custom-configs.json
 ``
+
+> [!TIP]
+> When you run multiple training instances and would like to check the progress of each training instance, you can run the following command to check.
+> 
+> ``
+> python for-ssh/checkdone.py
+> ``
+> 
+> It also tells you the time that the training has been stale for.  It is recommended that you check the training instance if it has been stale for over 2 hours.
 
 
 ### Post-Training Files & Checkpoints

@@ -21,7 +21,7 @@ def stale_flag(cur_epoch, p):
 
 
 outstrs = []
-for p in Path.cwd().glob("trained-*"):
+for p in Path.cwd().glob("trained*"):
     curepoch = get_epoch(p)
     done = str((p / "classifier-trained.pth").exists())
     stale = round(stale_flag(curepoch, p))
