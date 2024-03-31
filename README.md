@@ -29,7 +29,8 @@ To download data for this project, please follow the instructions below.
 
 ### Downloading Required Files
 
-You would need to have access to the Chain Lab RDS to download the data used in this study.  You should also be connected to UCL's WiFi or UCL's VPN to download the files.
+> [!IMPORTANT]
+> To download the data, you would need to have access to the Chain Lab RDS and be connected with UCL's network.
 
 #### Data Fetching
 
@@ -47,15 +48,18 @@ To compress the data (i.e. removing all data other than V call, J call and CDR3 
 python utils/file-compressor.py
 ```
 
-#### Pre-Trained Model Fetching
+#### Downloading TCR-BERT
 
-To download the [TCR-BERT](https://www.biorxiv.org/content/10.1101/2021.11.18.469186v1) pretrained model, you may run the following command:
+To download the two variants of [TCR-BERT](https://www.biorxiv.org/content/10.1101/2021.11.18.469186v1), you may run the following command:
 
 ```
 python loaders/load_ptm.py -o model
 ```
 
-This will invoke a script to download both variants of TCR-BERT from [HuggingFace](https://huggingface.co/).
+#### Downloading SCEPTR
+
+Please refer to SCEPTR's repository for downloading instructions
+
 
 ## Usage
 
@@ -68,10 +72,10 @@ This will continue the execution with the default configurations.  If you want i
 
 To modify the training configurations, you may modify the config.json as generated.  The configurations for the 3 training scripts are different.  You may find the description for each field in each training script as below:
 
-| Encoding Method  | Requirements Filename        |
-| ---------------- | ---------------------------- |
-| SCEPTR           | [Descriptions Here](instructions/sceptr-config.md) |
-| TCR-BERT         | [Descriptions Here](instructions/tcrbert-config.md) |
+| Encoding Method  | Configurations Description                           |
+| ---------------- | ---------------------------------------------------- |
+| SCEPTR           | [Descriptions Here](instructions/sceptr-config.md)   |
+| TCR-BERT         | [Descriptions Here](instructions/tcrbert-config.md)  |
 | Symbolic         | [Descriptions Here](instructions/symbolic-config.md) |
 
 
@@ -79,29 +83,15 @@ To modify the training configurations, you may modify the config.json as generat
 
 Throughout training, checkpoints will be made alongside with this current epoch's training statistics such as loss, accuracies and sufficient data to compute the AUC.  This repository provides Jupyter Files to analyse the whole training loop's statistics.  The Jupyter Files are as follows:
 
-#### `demo.ipynb`
-
-Jupyter Notebook used in the Demo Video.  Able to retrieve the training and testing dataset and inferences on them again.  It can also visualise the non-zero weights on the TCRs with their Amino Acid Sequencing.
-
-#### `specs-for-model.ipynb`
-
-Generates the Confusion Matrix and a graph of amount of TCRs against Loss.
-
 #### `training-stats-analysis.ipynb`
 
-Generates a report on the model's loss, accuracy and AUC throughout its training loop.
+#### `training-stats-combined.ipynb`
 
-#### `vector-similarity.ipynb`
+#### `sceptr-similarity.ipynb`
 
-Compares between two different model's parameters to obtain the similarity between them in terms of a dot product.
+#### `sceptr-interpretability.ipynb`
 
-#### `best-result-report.ipynb`
-
-Covers the following:
-
-- `vector-similarity.ipynb`'s graph to see how the scoring and classifying layers have converged through time.
-- The whole of `training-stats-analysis.ipynb`, with labels on the best epoch chosen by highest testing AUC (as the vertical lines on graphs)
-- The whole of `specs-for-model` on the best epoch chosen by highest AUC.
+#### `eval-stats-combined.ipynb`
 
 ## Known Errors
 
