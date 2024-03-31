@@ -46,6 +46,11 @@ To compress the data (i.e. removing all data other than V call, J call and CDR3 
 python utils/file-compressor.py
 ```
 
+#### Evaluation Set
+
+The patients that we placed in the evaluation set is placed [here](loaders/eval-set-ids.txt).  Their file names are [here](loaders/eval-set-fnames.txt).
+
+
 ### Downloading TCR-BERT
 
 To download the two variants of [TCR-BERT](https://www.biorxiv.org/content/10.1101/2021.11.18.469186v1), you may run the following command:
