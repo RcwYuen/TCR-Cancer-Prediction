@@ -8,7 +8,7 @@ For more details regarding this research, please view my dissertation [here](man
 
 ## Installation
 
-1. Clone this repository
+1. Download this repository
 2. Create a Python Environment venv through
    ``python3 -m venv $YOUR-VENV-NAME-HERE$``
 3. Activate your virtual environment, and run the following command
