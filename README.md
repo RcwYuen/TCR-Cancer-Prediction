@@ -84,9 +84,9 @@ python trainer.py --log-file custom-filename.log
 
 To modify the training configurations, you may modify the config.json generated from the command above.  The configurations available for each of the 3 training scripts are different.  You may find the description for each field in each training script as below:
 
-> `trainer-sceptr.py`: [Descriptions Here](instructions/sceptr-config.md)
-> `trainer-tcrbert.py`: [Descriptions Here](instructions/tcrbert-config.md)
-> `trainer-symbolic.py`: [Descriptions Here](instructions/symbolic-config.md)
+- `trainer-sceptr.py`: [Descriptions Here](instructions/sceptr-config.md)
+- `trainer-tcrbert.py`: [Descriptions Here](instructions/tcrbert-config.md)
+- `trainer-symbolic.py`: [Descriptions Here](instructions/symbolic-config.md)
 
 To specify which configuration file to run, you may use the following command:
 ``
