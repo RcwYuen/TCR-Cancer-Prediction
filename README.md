@@ -1,4 +1,4 @@
-# Multi-Instance Transfer Learning on TCR LLMs for Cancer Prediction
+# TCR LLMs for Cancer Prediction
 
 This project aims to investigate difference between the expressivity of physico-chemical properties (i.e. Atchley factors) and language models in cancer classifications using TCR CDR3 sequences.  With the use of a language model, we obtained high AUCs in classifying whether a patient has cancer.
 
@@ -32,13 +32,11 @@ For more details regarding this research, please view my dissertation [here](man
 
 ### Data Fetching
 
-To pull the data from the Chain Lab RDS, you may run the following command.
+To pull the data from the Chain Lab RDS, you may run the following command.  Please modify ``rds_mountpoint`` in ``loaders/config.json`` to your mountpoint in your computer.  You should not amend other configurations in the file.
 
 ```
 python loaders/load_cdr.py -config_path loaders/config.json
 ```
-
-Please modify ``rds_mountpoint`` in ``loaders/config.json`` to your mountpoint in your computer.  You should not amend other configurations in the file.
 
 To compress the data (i.e. removing all data other than V call, J call and CDR3 sequences), you may run
 
@@ -113,6 +111,12 @@ python trainer.py -c custom-configs.json
 ---
 
 ## Analysing Training Instances
+
+We have placed the results for our training with the configs in `results`.
+
+### Usage of the Evaluation Set
+
+### Jupyter Notebooks
 
 Throughout training, checkpoints will be made alongside with this current epoch's training statistics such as loss, accuracies and sufficient data to compute the AUC.  This repository provides Jupyter Files to analyse the whole training loop's statistics.  The Jupyter Files are as follows:
 
