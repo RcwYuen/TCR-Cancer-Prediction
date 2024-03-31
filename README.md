@@ -25,14 +25,12 @@ For more details regarding this research, please view my dissertation [here](man
 
 ---
 
-To download data for this project, please follow the instructions below.
-
-### Downloading Required Files
+## Downloading Required Files
 
 > [!IMPORTANT]
 > To download the data, you would need to have access to the Chain Lab RDS and be connected with UCL's network.
 
-#### Data Fetching
+### Data Fetching
 
 To pull the data from the Chain Lab RDS, you may run the following command.
 
@@ -48,7 +46,7 @@ To compress the data (i.e. removing all data other than V call, J call and CDR3 
 python utils/file-compressor.py
 ```
 
-#### Downloading TCR-BERT
+### Downloading TCR-BERT
 
 To download the two variants of [TCR-BERT](https://www.biorxiv.org/content/10.1101/2021.11.18.469186v1), you may run the following command:
 
@@ -56,10 +54,11 @@ To download the two variants of [TCR-BERT](https://www.biorxiv.org/content/10.11
 python loaders/load_ptm.py -o model
 ```
 
-#### Downloading SCEPTR
+### Downloading SCEPTR
 
 Please refer to SCEPTR's repository for downloading instructions
 
+---
 
 ## Usage
 
