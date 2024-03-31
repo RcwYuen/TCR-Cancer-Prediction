@@ -1,8 +1,10 @@
 # Multi-Instance Transfer Learning on TCR LLMs for Cancer Prediction
 
-This project aims to apply transfer learning to two LLMs pre-trained on TCRs, i.e. [TCR-BERT](https://www.biorxiv.org/content/10.1101/2021.11.18.469186v1) and an in-house model SCEPTR to classify cancer patients using a Multi-Instance approach to TCR Repertoires.
+This project aims to investigate difference between the expressivity of physico-chemical properties (i.e. Atchley factors) and language models in cancer classifications using TCR CDR3 sequences.  With the use of a language model, we obtained high AUCs in classifying whether a patient has cancer.
 
 For more details regarding this research, please view my dissertation [here](manuscript.pdf).
+
+---
 
 ## Installation
 
@@ -20,6 +22,8 @@ For more details regarding this research, please view my dissertation [here](man
 
 > [!NOTE]
 > SCEPTR is closed source.  Please install SCEPTR as of its instructions if you are granted permission to SCEPTR.  Please contact me [here](mailto://rcwyuen@gmail.com) for more details.
+
+---
 
 To download all required files, please follow the subsection below.
 
