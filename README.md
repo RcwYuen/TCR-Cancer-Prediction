@@ -48,7 +48,7 @@ python utils/file-compressor.py
 
 #### Evaluation Set
 
-The patients that we placed in the evaluation set is placed [here](loaders/eval-set-ids.txt).  Their file names are [here](loaders/eval-set-fnames.txt).
+The IDs for patients in the evaluation set is [here](loaders/eval-set-ids.txt) with [these](loaders/eval-set-fnames.txt) file names.
 
 
 ### Downloading TCR-BERT
