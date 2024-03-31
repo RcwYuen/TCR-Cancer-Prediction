@@ -71,11 +71,13 @@ python trainer.py --make --end
 ``
 
 after replacing `trainer.py` with the appropriate training script.  If you would want to run training using the default settings, you can run the following command instead.
+
 ``
 python trainer.py --make
 ``
 
 All scripts will generate a log file for its training process.  You may change the log file's name with the following command.
+
 ``
 python trainer.py --log-file custom-filename.log
 ``
@@ -89,6 +91,7 @@ To modify the training configurations, you may modify the config.json generated 
 - `trainer-symbolic.py`: [Descriptions Here](instructions/symbolic-config.md)
 
 To specify which configuration file to run, you may use the following command:
+
 ``
 python trainer.py -c custom-configs.json
 ``
