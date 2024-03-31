@@ -8,7 +8,7 @@ For more details regarding this research, please view my dissertation [here](htt
 
 1. Clone this repository
 2. Create a Python Environment venv through
-   ``python3 -m venv $YOUR-VENV-NAME-HERE``
+   ``python3 -m venv $YOUR-VENV-NAME-HERE$``
 3. Activate your virtual environment, and run the following command
    ``python -m pip install -r scripts/requirements.txt``
    Depending on your Operating System and CUDA requirements, please change ``requirements.txt`` to the following appropriately.
@@ -21,7 +21,6 @@ For more details regarding this research, please view my dissertation [here](htt
 | Linux            | True  | ``requirements-linux.txt``   |
 | Linux            | False | ``requirements-linux.txt``   |
 
-   
 4. To download all required files, please follow the subsection below.
 
 ### Downloading Required Files
@@ -90,19 +89,25 @@ To modify the training configurations, you may modify the config.json as generat
 Throughout training, checkpoints will be made alongside with this current epoch's training statistics such as loss, accuracies and sufficient data to compute the AUC.  This repository provides Jupyter Files to analyse the whole training loop's statistics.  The Jupyter Files are as follows:
 
 #### `demo.ipynb`
+
 Jupyter Notebook used in the Demo Video.  Able to retrieve the training and testing dataset and inferences on them again.  It can also visualise the non-zero weights on the TCRs with their Amino Acid Sequencing.
 
 #### `specs-for-model.ipynb`
+
 Generates the Confusion Matrix and a graph of amount of TCRs against Loss.
 
 #### `training-stats-analysis.ipynb`
+
 Generates a report on the model's loss, accuracy and AUC throughout its training loop.
 
 #### `vector-similarity.ipynb`
+
 Compares between two different model's parameters to obtain the similarity between them in terms of a dot product.
 
 #### `best-result-report.ipynb`
-Covers the following: 
+
+Covers the following:
+
 - `vector-similarity.ipynb`'s graph to see how the scoring and classifying layers have converged through time.
 - The whole of `training-stats-analysis.ipynb`, with labels on the best epoch chosen by highest testing AUC (as the vertical lines on graphs)
 - The whole of `specs-for-model` on the best epoch chosen by highest AUC.
