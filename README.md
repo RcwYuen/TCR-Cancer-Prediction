@@ -116,6 +116,12 @@ We have placed the results for our training with the configs in `results`.
 
 ### Usage of the Evaluation Set
 
+To test a model's performance on the evaluation set, you may use the following command after amending the model's directory and the best performing epoch.
+
+``
+python src/calculate_evals.py
+``
+
 ### Jupyter Notebooks
 
 Throughout training, checkpoints will be made alongside with this current epoch's training statistics such as loss, accuracies and sufficient data to compute the AUC.  This repository provides Jupyter Files to analyse the whole training loop's statistics.  The Jupyter Files are as follows:
