@@ -4,6 +4,9 @@ This project aims to investigate difference between the expressivity of physico-
 
 For more details regarding this research, please view my dissertation [here](manuscript.pdf).
 
+> [!NOTE]
+> This code has been tested on Windows 11 and Linux CentOS (UCL CS lab 105 Computers).  Although it should work on other OS, it is not guaranteed to work perfectly.
+
 ---
 
 ## Installation
