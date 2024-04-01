@@ -7,8 +7,6 @@
 | `maa-model`            | `bool`                     | Whether to use the Masked Amino Acid Model, for details, see[TCR-BERT](https://www.biorxiv.org/content/10.1101/2021.11.18.469186v1)'s white paper |
 | `negative-dir`         | `list[str]`                | Directory Location to Control Data                                                                                                             |
 | `positive-dir`         | `list[str]`                | Directory Location to Cancer Patients                                                                                                          |
-| `cdr1`                 | `bool`                     | Whether to include CDR1 sequences into classification.  For TCR-BERT, this should be set to `false`                                          |
-| `cdr2`                 | `bool`                     | Whether to include CDR2 sequences into classification.  For TCR-BERT, this should be set to `false`                                          |
 | `batch-size`           | `int`                      | Amount of TCR sequences inside each patient to pass into the model at once                                                                     |
 | `epoch`                | `int`                      | Amount of Epochs to train the model                                                                                                            |
 | `lr`                   | `float` or `list[float]` | Learning Rate, or a List of Learning Rates                                                                                                     |

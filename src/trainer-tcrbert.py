@@ -43,8 +43,6 @@ def default_configs(write_to=False):
         "maa-model": True,
         "negative-dir": ["control"],
         "positive-dir": ["pbmc_cancer"],
-        "cdr1": False,
-        "cdr2": False,
         "batch-size": 512,
         "epoch": 50,
         "lr": 0.001,
@@ -87,8 +85,6 @@ def make_tcrargs(config):
         "path": config["input-path"],
         "positives": config["positive-dir"],
         "negatives": config["negative-dir"],
-        "cdr1": config["cdr1"],
-        "cdr2": config["cdr2"],
         "split": config["train-split"]
     }
 
