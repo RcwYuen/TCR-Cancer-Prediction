@@ -128,20 +128,11 @@ python src/calculate_evals.py
 
 Throughout training, checkpoints will be made alongside with this current epoch's training statistics such as loss, accuracies and sufficient data to compute the AUC.  This repository provides Jupyter Files to analyse the whole training loop's statistics.  The Jupyter Files are as follows:
 
-#### (`training-stats-analysis.ipynb`)[training-stats-analysis.ipynb]
-Generates the loss, accuracy and AUC graphs for *one* training instance.
-
-#### (`training-stats-combined.ipynb`)[training-stats-combined.ipynb]
-Generates the loss, accuracy and AUC graphs for a series of training instances.  Places the graphs for the training instances together in one graph.
-
-#### (`sceptr-similarity.ipynb`)[sceptr-similarity.ipynb]
-Computes the cosine similarity and euclidean distance between the scoring layer and classifying layer's weights after an l2-norm.
-
-#### (`sceptr-interpretability.ipynb`)[sceptr-interpretability.ipynb]
-Computed Appendix A.3 of the manuscript.  It finds the occurence of V/J calls that the model assigns a non-zero weighting in the evaluation dataset as well as CDR3 sequences that assigned a non-zero weighting in different patients.
-
-#### (`eval-stats-combined.ipynb`)[eval-stats-combined.ipynb]
-Generates the confusion matrix and AUC curves for the models that are trained after withholding an evaluation set.
+- (`training-stats-analysis.ipynb`)[training-stats-analysis.ipynb]: Generates the loss, accuracy and AUC graphs for *one* training instance.
+- (`training-stats-combined.ipynb`)[training-stats-combined.ipynb]: Generates the loss, accuracy and AUC graphs for a series of training instances.  Places the graphs for the training instances together in one graph.
+- (`sceptr-similarity.ipynb`)[sceptr-similarity.ipynb]: Computes the cosine similarity and euclidean distance between the scoring layer and classifying layer's weights after an l2-norm.
+- (`sceptr-interpretability.ipynb`)[sceptr-interpretability.ipynb]: Computed Appendix A.3 of the manuscript.  It finds the occurence of V/J calls that the model assigns a non-zero weighting in the evaluation dataset as well as CDR3 sequences that assigned a non-zero weighting in different patients.
+- (`eval-stats-combined.ipynb`)[eval-stats-combined.ipynb]: Generates the confusion matrix and AUC curves for the models that are trained after withholding an evaluation set.
 
 ---
 
