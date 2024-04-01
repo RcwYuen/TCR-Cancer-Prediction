@@ -11,6 +11,9 @@ For more details regarding this research, please view my dissertation [here](man
 
 ## Installation
 
+> [!IMPORTANT]
+> We developed the code under Python 3.11, and the requirements.txt has been generated in the same environment.  Therefore installing the requirements may not work for Python versions below 3.11.
+
 1. Download this repository
 2. Create a Python Environment venv through
    ```python3 -m venv $YOUR-VENV-NAME-HERE$```
