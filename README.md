@@ -44,7 +44,11 @@ To compress the data (i.e. removing all data other than V call, J call and CDR3 
 python utils/file-compressor.py
 ```
 
-The fetched data will contain files that are from multiple sa
+The fetched data will contain files that are from multiple sampling timestamps.  To obtain the data for healthy patients and remove duplicated patient files, please run:
+```
+python utils/remove-control-dups.py
+python rds_file_locations/remove-cancer-dups.py
+```
 
 #### Evaluation Set
 
@@ -140,7 +144,7 @@ Throughout training, checkpoints will be made alongside with this current epoch'
 
 We report known errors here.  Please contact me [here](mailto://rcwyuen@gmail.com) to report any problems.
 
-- Path Length Problems: If your path is too long in Windows, you are prone to the following error:
+- Path Length: If your path is too long in Windows, you are prone to the following error:
 
   ```DLL load failed while importing $SOMETHING$: The filename or extension is too long.```
 

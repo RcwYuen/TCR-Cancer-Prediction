@@ -2,13 +2,18 @@ import shutil
 import os
 from pathlib import Path
 
+def make_directory_where_necessary(directory):
+    if not os.path.exists(directory):
+        if make_directory_where_necessary(directory.parent):
+            os.mkdir(directory)
+    return True
+
 # Define the origin and destination directories
 origin_dir = Path.cwd() / "data/files/control/"  # Update this to your actual origin directory
 destination_dir = Path.cwd() / "data/full-trimmed/control/"  # Update this to your actual destination directory
 
 # Create the destination directory if it doesn't exist
-if not os.path.exists(destination_dir):
-    os.makedirs(destination_dir)
+make_directory_where_necessary(destination_dir)
 
 paths = {}
 
