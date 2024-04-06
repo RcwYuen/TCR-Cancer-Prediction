@@ -152,6 +152,8 @@ We report known errors here.  Please contact me [here](mailto://rcwyuen@gmail.co
 
 - Path Length: If your path is too long in Windows, you are prone to the following error:
 
-  ```DLL load failed while importing $SOMETHING$: The filename or extension is too long.```
+  ```
+  DLL load failed while importing $SOMETHING$: The filename or extension is too long.
+  ```
 
   A mitigation strategy is to use the global Python, or to put your files in a shorter directory.
