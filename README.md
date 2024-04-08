@@ -4,7 +4,7 @@ This project aims to investigate difference between the expressivity of physico-
 
 For more details regarding this research, please view my dissertation [here](manuscript.pdf).
 
-> [!NOTE]
+> [!WARNING]
 > This code has been tested on Windows 11 and Linux CentOS (UCL CS lab 105 Computers).  Although it should work on other OS, it is not guaranteed to work perfectly.
 
 ---
@@ -27,7 +27,7 @@ For more details regarding this research, please view my dissertation [here](man
 > You should install your own version of PyTorch depending on your CUDA version before installing the `requirements.txt`.  You may find instructions of installing PyTorch [here](https://pytorch.org/).
 
 > [!NOTE]
-> SCEPTR is closed source as of this current moment.  Please contact [this email](mailto://rcwyuen@gmail.com) for more details.
+> SCEPTR is closed source for now.  Please contact [this email](mailto://rcwyuen@gmail.com) for more details.
 
 ---
 
@@ -139,10 +139,10 @@ python src/calculate_evals.py
 Throughout training, checkpoints will be made alongside with this current epoch's training statistics such as loss, accuracies and sufficient data to compute the AUC.  This repository provides Jupyter Files to analyse the whole training loop's statistics.  The Jupyter Files are as follows:
 
 - [`training-stats-analysis.ipynb`](training-stats-analysis.ipynb): Generates the loss, accuracy and AUC graphs for *one* training instance.
-- [`training-stats-combined.ipynb`](training-stats-combined.ipynb): Generates the loss, accuracy and AUC graphs for a series of training instances.  Places the graphs for the training instances together in one graph.
-- [`sceptr-similarity.ipynb`](sceptr-similarity.ipynb): Computes the cosine similarity and euclidean distance between the scoring layer and classifying layer's weights after an l2-norm.
-- [`sceptr-interpretability.ipynb`](sceptr-interpretability.ipynb): Computed Appendix A.3 of the manuscript.  It finds the occurence of V/J calls that the model assigns a non-zero weighting in the evaluation dataset as well as CDR3 sequences that assigned a non-zero weighting in different patients.
-- [`eval-stats-combined.ipynb`](eval-stats-combined.ipynb): Generates the confusion matrix and AUC curves for the models that are trained after withholding an evaluation set.
+- [`training-stats-combined.ipynb`](training-stats-combined.ipynb): Generates the loss, accuracy and AUC graphs for a series of training instances.
+- [`sceptr-similarity.ipynb`](sceptr-similarity.ipynb): Computes the cosine similarity and euclidean distance between the scoring layer and classifying layer's weights after an l2-norm for SCEPTR's downstream model.
+- [`sceptr-interpretability.ipynb`](sceptr-interpretability.ipynb): Computed Appendix A.3 of the manuscript.  It finds the occurence of V/J calls that the model assigned a non-zero weighting in the evaluation dataset as well as CDR3 sequences that is shared between multiple patients and is assigned a non-zero weighting.
+- [`eval-stats-combined.ipynb`](eval-stats-combined.ipynb): Generates the confusion matrix and AUC curves for the models that are trained under a 3-way split.
 
 ---
 
