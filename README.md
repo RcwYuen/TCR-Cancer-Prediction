@@ -22,12 +22,14 @@ For more details regarding this research, please view my dissertation [here](man
    if your computer is a Windows Computer, and 
    ```python -m pip install -r scripts/requirements-linux.txt```
    if it is Linux Ubuntu instead.
+4. Install SCEPTR via the following command:
+   ```python -m pip install sceptr
 
 > [!NOTE]
 > You should install your own version of PyTorch depending on your CUDA version before installing the `requirements.txt`.  You may find instructions of installing PyTorch [here](https://pytorch.org/).
 
 > [!NOTE]
-> SCEPTR is closed source for now.  Please contact [this email](mailto://rcwyuen@gmail.com) for more details.
+> SCEPTR has been published officially [here](https://arxiv.org/abs/2406.06397v1).
 
 ---
 
@@ -71,7 +73,7 @@ python loaders/load_ptm.py -o model
 
 ### Downloading SCEPTR
 
-Please refer to SCEPTR's repository for downloading instructions
+Please refer to [this](https://pypi.org/project/sceptr/) link for installation instructions for SCEPTR.
 
 ---
 
