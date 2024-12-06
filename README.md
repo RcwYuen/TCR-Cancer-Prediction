@@ -23,7 +23,7 @@ For more details regarding this research, please view my dissertation [here](man
    ```python -m pip install -r scripts/requirements-linux.txt```
    if it is Linux Ubuntu instead.
 4. Install SCEPTR via the following command:
-   ```python -m pip install sceptr
+   ```python -m pip install sceptr```
 
 > [!NOTE]
 > You should install your own version of PyTorch depending on your CUDA version before installing the `requirements.txt`.  You may find instructions of installing PyTorch [here](https://pytorch.org/).
