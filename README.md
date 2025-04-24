@@ -1,3 +1,7 @@
+# Note
+
+Please view the updated and tidied repository [here](https://www.github.com/RcwYuen/TCR-Embeddings).
+
 # TCR LLMs for Cancer Prediction
 
 This project aims to investigate difference between the expressivity of physico-chemical properties (i.e. Atchley factors) and language models in cancer classifications using TCR CDR3 sequences.  With the use of a language model, we obtained high AUCs in classifying whether a patient has cancer.
